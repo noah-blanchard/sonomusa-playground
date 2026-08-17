@@ -19,4 +19,27 @@ export {
   SLUG_PATTERN,
 } from './schemas'
 
+export {
+  createProjectRepository,
+  localProjectSource,
+  projectRepository,
+} from './repository'
+export type { ProjectRepository, ProjectSource } from './repository'
+
+export {
+  collectTags,
+  compareProjects,
+  findBySlug,
+  formatProjectNumber,
+  selectByCategory,
+  selectByStatus,
+  selectByTag,
+  selectFeatured,
+  selectLinkable,
+  selectNeighbours,
+  selectRelated,
+  sortProjects,
+} from './selectors'
+export type { Neighbours, TagCount } from './selectors'
+
 export type { Preview, PreviewKind, Project, ProjectInput, ProjectStatus } from './types'
