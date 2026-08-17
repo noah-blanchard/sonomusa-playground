@@ -16,6 +16,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     include: ['src/**/*.test.{ts,tsx}', 'scripts/**/*.test.ts'],
+    // Keeps filtered runs (`vitest run selectors`) from failing simply because
+    // the filter matched nothing.
+    passWithNoTests: true,
     coverage: {
       // Coverage targets the contracts, not the pixels. CONCEPT §37: the goal
       // is confidence that the modular contract holds, not a headline number.

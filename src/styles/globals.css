@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+/*
+ * Shell baseline only. Everything visual is a token — see tokens.css and
+ * docs/rules/03-design-system.md. Project previews render inside their own
+ * frames and deliberately do not inherit from here.
+ */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-obsidian);
+    color: var(--color-bone);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /*
+   * Focus follows the stencil motif — visible and broken, never removed.
+   * See docs/rules/05-experience.md.
+   */
+  :focus-visible {
+    outline: var(--hairline) solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background-color: var(--color-bone);
+    color: var(--color-obsidian);
+  }
+
+  /*
+   * Reduced motion is a supported mode, not a degraded one. Transitions
+   * collapse to near-instant so state changes stay visible without travel.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

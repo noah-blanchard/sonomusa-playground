@@ -1,0 +1,101 @@
+/*
+ * SonoMusa design tokens — the single source of truth for every visual value
+ * in the shell. If you need a value that is not here, add a token and say why.
+ * Arbitrary literals in components are a lint-review failure.
+ *
+ * See docs/rules/03-design-system.md for the reasoning behind each group.
+ */
+
+@theme {
+  /* ───────────────────────────────────────────────────────────────────────
+   * Colour
+   *
+   * The shell is greyscale by design. In the reference composition every drop
+   * of colour comes from project media — that is what lets radically different
+   * projects sit together without competing with the frame.
+   * ─────────────────────────────────────────────────────────────────────── */
+  --color-obsidian: #0a0a0a;
+  --color-soft-black: #151515;
+  --color-graphite: #1e1e1e;
+  --color-slate: #2a2a2a;
+  --color-steel: #8a8a8a;
+  --color-bone: #f0efea;
+
+  /*
+   * Accent is punctuation, not atmosphere. It starts as bone — effectively
+   * colourless — and is permitted only in an active indicator, a dot, an
+   * underline, a focus ring, a selection. Never a gradient, glow or fog.
+   * Introducing a hue later is a deliberate one-token change.
+   */
+  --color-accent: var(--color-bone);
+
+  /* Layered surfaces, named by role rather than by shade. */
+  --color-surface-page: var(--color-obsidian);
+  --color-surface-raised: var(--color-soft-black);
+  --color-surface-well: var(--color-graphite);
+
+  /* Text roles. Steel is secondary only — never essential text at small size. */
+  --color-text-primary: var(--color-bone);
+  --color-text-secondary: var(--color-steel);
+  --color-text-inverted: var(--color-obsidian);
+
+  /* ───────────────────────────────────────────────────────────────────────
+   * Line — hairline weight is core to the identity, echoing the logo's stroke.
+   * ─────────────────────────────────────────────────────────────────────── */
+  --hairline: 1px;
+  --color-line: rgb(240 239 234 / 0.12);
+  --color-line-strong: rgb(240 239 234 / 0.24);
+  --color-line-faint: rgb(240 239 234 / 0.06);
+
+  /* ───────────────────────────────────────────────────────────────────────
+   * Typography — three families, three jobs, no overlap.
+   * The --font-*-src variables are populated by next/font/local in layout.tsx;
+   * the fallbacks keep the shell legible before fonts resolve.
+   * ─────────────────────────────────────────────────────────────────────── */
+  --font-display: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-title: var(--font-jost), var(--font-inter-tight), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
+
+  /* Tracking. Wide uppercase labels are as much of the identity as the faces. */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.08em;
+  --tracking-label: 0.18em;
+  --tracking-logo: 0.24em;
+
+  --leading-display: 0.95;
+  --leading-title: 1.1;
+  --leading-body: 1.6;
+
+  /* ───────────────────────────────────────────────────────────────────────
+   * Motion — one shared vocabulary. No component invents its own spring.
+   * Consistency comes from rhythm, not from effects.
+   * ─────────────────────────────────────────────────────────────────────── */
+  --duration-fast: 120ms;
+  --duration-base: 320ms;
+  --duration-slow: 720ms;
+
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-linear: linear;
+
+  /* ───────────────────────────────────────────────────────────────────────
+   * Layout
+   * ─────────────────────────────────────────────────────────────────────── */
+  --layout-max: 1680px;
+  --layout-gutter: 2rem;
+  --layout-gutter-sm: 1.25rem;
+
+  /* ───────────────────────────────────────────────────────────────────────
+   * Depth — the gallery composition only, kept here so the stacking order is
+   * legible in one place rather than scattered as magic numbers.
+   * ─────────────────────────────────────────────────────────────────────── */
+  --z-base: 0;
+  --z-gallery-neighbour: 10;
+  --z-gallery-active: 20;
+  --z-nav: 50;
+  --z-overlay: 100;
+
+  --radius-none: 0px;
+  --radius-frame: 2px;
+}

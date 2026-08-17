@@ -12,10 +12,13 @@ const nextConfig: NextConfig = {
 
   reactStrictMode: true,
 
-  // Fail the production build on type or lint errors. CONCEPT §36: a malformed
-  // project must never reach a deployment.
+  // Fail the production build on type errors. CONCEPT §36: a malformed project
+  // must never reach a deployment.
+  //
+  // Next 16 removed the built-in lint-during-build hook, so linting is a
+  // separate gate — `bun run verify` runs it before `next build`, and CI runs
+  // the same sequence.
   typescript: { ignoreBuildErrors: false },
-  eslint: { ignoreDuringBuilds: false },
 
   images: {
     // Project media is authored as .webp; AVIF is emitted where the client
