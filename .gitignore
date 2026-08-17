@@ -43,5 +43,9 @@ yarn-error.log*
 .vscode/*
 !.vscode/extensions.json
 
+# Synced from src/content/projects/*/ by scripts/sync-media.ts. Derived output —
+# the originals live beside their manifests so projects stay self-contained.
+/public/projects/
+
 # NOTE: src/content/projects/registry.generated.ts is intentionally COMMITTED.
 # See docs/rules/01-architecture.md — reproducible builds and visible diffs.

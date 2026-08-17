@@ -19,6 +19,7 @@ import { join, relative } from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'
 import { parseProject } from '../src/domain/project/parse'
 import type { Project } from '../src/domain/project/types'
+import { registeredComponentIds } from '../src/features/project-preview/registry/componentPreviews'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const PROJECTS_DIR = join(ROOT, 'src', 'content', 'projects')
@@ -122,6 +123,21 @@ async function main() {
     for (const asset of collectDeclaredAssets(project)) {
       if (!existsSync(join(PROJECTS_DIR, dir, asset))) {
         report(source, `declares "${asset}" but no such file exists in the project directory.`)
+      }
+    }
+
+    // A componentId that resolves to nothing degrades to the poster at runtime,
+    // which means it would ship silently. Catch it here instead.
+    if (project.preview.kind === 'component') {
+      const registered = registeredComponentIds()
+
+      if (!registered.includes(project.preview.componentId)) {
+        report(
+          source,
+          `preview.componentId "${project.preview.componentId}" is not registered.\n` +
+            `Add it to src/features/project-preview/registry/componentPreviews.ts.` +
+            (registered.length > 0 ? `\nRegistered: ${registered.join(', ')}` : '\nNothing is registered yet.'),
+        )
       }
     }
 

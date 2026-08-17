@@ -5,8 +5,10 @@
   "type": "module",
   "description": "An evolving, immersive digital gallery for SonoMusa projects.",
   "scripts": {
-    "dev": "bun run registry:generate && next dev",
-    "build": "bun run registry:generate && next build",
+    "dev": "bun run content:prepare && next dev",
+    "build": "bun run content:prepare && next build",
+    "content:prepare": "bun run registry:generate && bun run media:sync",
+    "media:sync": "bun scripts/sync-media.ts",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
