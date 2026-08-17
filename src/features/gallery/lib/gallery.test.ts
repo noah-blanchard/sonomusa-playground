@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   depthStyle,
+  edgeAlpha,
   FRAME_INSET,
   mobileDepthStyle,
   neighbourRightEdge,
@@ -185,6 +186,62 @@ describe('depthStyle', () => {
       expect(depthStyle(1, { reducedMotion: true }).rendered).toBe(true)
       expect(depthStyle(3, { reducedMotion: true }).rendered).toBe(false)
     })
+  })
+})
+
+/**
+ * The frames overlap and the palette gives their fills six sRGB levels of
+ * separation, so the outline is the only thing telling one card from the next.
+ * It is also the easiest thing to lose by accident: it is authored pre-divided by
+ * `opacity`, so retuning the fade silently retunes the edge with it.
+ *
+ * These assert the COMPOSITED weight — what actually reaches the screen — because
+ * the authored number on its own says nothing about legibility.
+ */
+describe('the separation edge', () => {
+  /** What lands on screen once the frame's own opacity has been applied. */
+  function composited(distance: number): number {
+    const { edgeAlpha: alpha, opacity } = depthStyle(distance)
+
+    return alpha * opacity
+  }
+
+  /** `--color-line`, the shell's baseline hairline. */
+  const BASELINE = 0.12
+
+  it('draws the front frame with the strongest outline', () => {
+    expect(composited(0)).toBeGreaterThan(composited(1))
+  })
+
+  it('keeps a visible neighbour reading as its own object', () => {
+    // Below the baseline hairline the neighbour dissolves into the background and
+    // the stack reads as a smear rather than as cards behind cards.
+    expect(composited(0)).toBeGreaterThanOrEqual(BASELINE)
+    expect(composited(1)).toBeGreaterThanOrEqual(BASELINE)
+  })
+
+  it('mirrors left and right', () => {
+    expect(depthStyle(-1).edgeAlpha).toBe(depthStyle(1).edgeAlpha)
+  })
+
+  it('draws no edge where there is no boundary', () => {
+    // Off-stage, reduced motion and mobile all park the frame at opacity 0.
+    expect(depthStyle(VISIBLE_NEIGHBOURS + 1).edgeAlpha).toBe(0)
+    expect(depthStyle(1, { reducedMotion: true }).edgeAlpha).toBe(0)
+    expect(mobileDepthStyle(0).edgeAlpha).toBe(0)
+    expect(mobileDepthStyle(1).edgeAlpha).toBe(0)
+  })
+
+  it('stays a legal alpha however faint the frame gets', () => {
+    expect(edgeAlpha(0.14, 0.01)).toBe(1)
+    expect(edgeAlpha(0.14, 0)).toBe(0)
+
+    for (const offset of [-3, -2, -1, 0, 1, 2, 3]) {
+      const { edgeAlpha: alpha } = depthStyle(offset)
+
+      expect(alpha).toBeGreaterThanOrEqual(0)
+      expect(alpha).toBeLessThanOrEqual(1)
+    }
   })
 })
 

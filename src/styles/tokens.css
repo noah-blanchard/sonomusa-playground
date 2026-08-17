@@ -43,9 +43,17 @@
    * Line — hairline weight is core to the identity, echoing the logo's stroke.
    * ─────────────────────────────────────────────────────────────────────── */
   --hairline: 1px;
-  --color-line: rgb(240 239 234 / 0.12);
-  --color-line-strong: rgb(240 239 234 / 0.24);
-  --color-line-faint: rgb(240 239 234 / 0.06);
+
+  /*
+   * Every line in the shell is bone at a low alpha. The channel is lifted out so
+   * that a weight can be *derived* rather than picked from the three below — the
+   * gallery's separation edge varies its alpha per frame, and it must still be
+   * this colour rather than a literal of its own.
+   */
+  --line-rgb: 240 239 234;
+  --color-line: rgb(var(--line-rgb) / 0.12);
+  --color-line-strong: rgb(var(--line-rgb) / 0.24);
+  --color-line-faint: rgb(var(--line-rgb) / 0.06);
 
   /* ───────────────────────────────────────────────────────────────────────
    * Typography — three families, three jobs, no overlap.

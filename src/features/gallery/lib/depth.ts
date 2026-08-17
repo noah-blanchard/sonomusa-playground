@@ -55,11 +55,45 @@ export function neighbourRightEdge(inset: number, x: number, scale: number): num
   return 0.5 + (x / 100) * width + (width / 2) * scale
 }
 
+/**
+ * Target *composited* alpha of a frame's separation edge, by role.
+ *
+ * The active frame's edge is the shell's strong hairline — it has to separate two
+ * fills that differ by six sRGB levels, which no amount of dimming can widen. A
+ * neighbour's sits just above the baseline hairline: enough to read as its own
+ * object behind the front one, not enough to compete with it.
+ */
+const EDGE_TARGET_ACTIVE = 0.24
+const EDGE_TARGET_NEIGHBOUR = 0.14
+
+/**
+ * The authored alpha that lands on `target` once the frame's own opacity is applied.
+ *
+ * `opacity` multiplies the whole subtree, pseudo elements included, so an edge
+ * written at its target alpha arrives at a fraction of it — which is how the
+ * neighbours' outlines ended up at 6% and dissolved into the background. Dividing
+ * here is what lets the outline stay legible while the body recedes, so framing
+ * carries hierarchy alongside scale, position and opacity (CONCEPT §20).
+ *
+ * The clamp only ever bites at distance 2, which is off-stage anyway — see the
+ * `neighbourRightEdge` note below. It is a guard, not a visual decision.
+ */
+export function edgeAlpha(target: number, opacity: number): number {
+  if (opacity <= 0) return 0
+
+  return Math.min(1, target / opacity)
+}
+
 export interface DepthStyle {
   /** Horizontal offset as a percentage of the frame's own width. */
   x: number
   scale: number
   opacity: number
+  /**
+   * Alpha for the frame's separation edge, pre-divided by `opacity` above so the
+   * composited result is the intended weight rather than the faded remainder.
+   */
+  edgeAlpha: number
   zIndex: number
   /** Neighbours are scenery — only the active frame takes pointer input. */
   interactive: boolean
@@ -98,7 +132,16 @@ export function depthStyle(offset: number, options: { reducedMotion?: boolean } 
   const direction = Math.sign(offset)
 
   if (distance === 0) {
-    return { x: 0, scale: 1, opacity: 1, zIndex: 30, interactive: true, rendered: true, hidden: false }
+    return {
+      x: 0,
+      scale: 1,
+      opacity: 1,
+      edgeAlpha: edgeAlpha(EDGE_TARGET_ACTIVE, 1),
+      zIndex: 30,
+      interactive: true,
+      rendered: true,
+      hidden: false,
+    }
   }
 
   /*
@@ -108,7 +151,16 @@ export function depthStyle(offset: number, options: { reducedMotion?: boolean } 
    * opted out of.
    */
   if (reducedMotion) {
-    return { x: 0, scale: 1, opacity: 0, zIndex: 0, interactive: false, rendered: distance <= 1, hidden: true }
+    return {
+      x: 0,
+      scale: 1,
+      opacity: 0,
+      edgeAlpha: 0,
+      zIndex: 0,
+      interactive: false,
+      rendered: distance <= 1,
+      hidden: true,
+    }
   }
 
   if (distance > VISIBLE_NEIGHBOURS) {
@@ -118,6 +170,7 @@ export function depthStyle(offset: number, options: { reducedMotion?: boolean } 
       x: direction * 150,
       scale: 0.6,
       opacity: 0,
+      edgeAlpha: 0,
       zIndex: 0,
       interactive: false,
       rendered: false,
@@ -144,6 +197,7 @@ export function depthStyle(offset: number, options: { reducedMotion?: boolean } 
     x,
     scale,
     opacity,
+    edgeAlpha: edgeAlpha(EDGE_TARGET_NEIGHBOUR, opacity),
     zIndex: 30 - distance,
     interactive: false,
     rendered: true,
@@ -159,8 +213,23 @@ export function depthStyle(offset: number, options: { reducedMotion?: boolean } 
 export function mobileDepthStyle(offset: number): DepthStyle {
   const distance = Math.abs(offset)
 
+  /*
+   * No `edgeAlpha` at any offset. Frames are full-width and shown one at a time,
+   * so nothing overlaps and there is no boundary to draw — a vertical hairline
+   * here would just sit on the screen gutter. `.gallery-frame::after` is switched
+   * off below 768px to match.
+   */
   if (distance === 0) {
-    return { x: 0, scale: 1, opacity: 1, zIndex: 30, interactive: true, rendered: true, hidden: false }
+    return {
+      x: 0,
+      scale: 1,
+      opacity: 1,
+      edgeAlpha: 0,
+      zIndex: 30,
+      interactive: true,
+      rendered: true,
+      hidden: false,
+    }
   }
 
   return {
@@ -169,6 +238,7 @@ export function mobileDepthStyle(offset: number): DepthStyle {
     x: Math.sign(offset) * 110,
     scale: 1,
     opacity: 0,
+    edgeAlpha: 0,
     zIndex: 0,
     interactive: false,
     // The immediate neighbour stays mounted so a swipe reveals something

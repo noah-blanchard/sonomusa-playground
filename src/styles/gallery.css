@@ -15,6 +15,17 @@
  *      pressing next repeatedly stays smooth for free.
  */
 
+/*
+ * Registered so the edge alpha interpolates across the travel. An unregistered
+ * custom property has no type, so it flips at the halfway point of the transition
+ * and the outline would snap the moment the active index changes.
+ */
+@property --frame-edge {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
 @layer components {
   /*
    * The stage. Two responsibilities, and they are not the same one:
@@ -73,6 +84,42 @@
   }
 
   /*
+   * The separation edge.
+   *
+   * A distance-1 neighbour slides ~2% UNDER the active frame by design (depth.ts),
+   * and at this end of the palette the two fills land six sRGB levels apart — so
+   * the boundary between them can only be a line, never a difference in fill.
+   *
+   * Drawn here rather than on the card's own `.stencil-frame` for two reasons.
+   * The media well is flush to the article's right edge and paints an opaque
+   * background over the article's background layer, which is where that hairline
+   * lives — so the frame's right edge currently renders nothing at all. And the
+   * edge exists because of the carousel's overlap, so it belongs to the carousel
+   * rather than to a card that is also used elsewhere.
+   *
+   * Vertical only, full height: two hairlines rather than a closed rectangle, so
+   * the corner-gap motif still holds (docs/rules/03-design-system.md). The top and
+   * bottom keep their breaks, and the neighbours are vertically inset by their own
+   * scale, so those edges already read against the page.
+   *
+   * `--frame-edge` arrives pre-divided by `--frame-opacity` — see `edgeAlpha` in
+   * depth.ts. Opacity multiplies pseudo elements too, and an outline that fades
+   * with its own fill is exactly what made the stack illegible.
+   */
+  .gallery-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+
+    border-left: var(--hairline) solid rgb(var(--line-rgb) / var(--frame-edge));
+    border-right: var(--hairline) solid rgb(var(--line-rgb) / var(--frame-edge));
+
+    transition: border-color var(--duration-slow) var(--ease-standard);
+  }
+
+  /*
    * Mobile is a reinterpretation, not a compression (CONCEPT §32): full-width
    * frames, one at a time, no scaling.
    */
@@ -82,6 +129,14 @@
       right: 0;
       transform: translate3d(var(--frame-x-sm), 0, 0);
       opacity: var(--frame-opacity-sm);
+    }
+
+    /*
+     * Nothing overlaps here — one full-width frame at a time — so there is no
+     * boundary to draw, and the lines would land on the screen gutter instead.
+     */
+    .gallery-frame::after {
+      content: none;
     }
 
     /*

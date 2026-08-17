@@ -109,6 +109,7 @@ export function GalleryViewport({
                     '--frame-x': `${desktop.x}%`,
                     '--frame-scale': desktop.scale,
                     '--frame-opacity': desktop.opacity,
+                    '--frame-edge': desktop.edgeAlpha,
                     '--frame-x-sm': `${mobile.x}%`,
                     '--frame-opacity-sm': mobile.opacity,
                     zIndex: desktop.zIndex,
