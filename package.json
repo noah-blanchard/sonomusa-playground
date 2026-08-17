@@ -22,6 +22,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "shots": "bun scripts/capture-shots.ts",
     "verify": "bun run registry:check && bun run validate:content && bun run check:architecture && bun run typecheck && bun run lint && bun run test && bun run build"
   },
   "dependencies": {

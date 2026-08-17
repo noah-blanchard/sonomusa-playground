@@ -20,6 +20,9 @@ playwright-report/
 blob-report/
 .playwright/
 
+# Screenshots from `bun run shots` — looked at, never committed.
+.shots/
+
 # misc
 .DS_Store
 *.pem
