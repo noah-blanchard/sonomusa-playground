@@ -48,11 +48,19 @@ The binding MUST from CONCEPT §3.1 and §15 — that preview be a discriminated
 
 No project subdomains exist yet. Rather than model a URL that is not real, the field is optional: when absent the frame offers no destination and `status` carries the meaning. A dead call to action is worse than none.
 
-### 6. No carousel library
+### 6. No carousel library, and in the end no animation library either
 
-CONCEPT §5.4 permits one but insists the visual model stay custom. The reference composition is not a scroll track — it is a depth composition where each card's transform derives from its offset from the active index. Scroll-snap libraries model a scrolling container, which fights that directly.
+CONCEPT §5.4 permits a carousel library but insists the visual model stay custom. The reference composition is not a scroll track — it is a depth composition where each frame's transform derives from its offset from the active index. Scroll-snap libraries model a scrolling container, which fights that directly.
 
-An index-driven reducer plus Motion's drag primitives is smaller, exactly controllable, and cannot leak a generic carousel look. Mobile reuses the same reducer with a different derived layout.
+So: an index-driven reducer, with every frame's position, scale and opacity derived from `signedOffset`. Mobile reuses the same reducer with a different derived layout.
+
+**Motion was planned and then removed**, because CSS turned out to do the job better here. The derived values are handed to CSS as custom properties and the transition is a CSS transition, which buys three things a JS animation library could not:
+
+- the mobile arrangement is a **media query** rather than a viewport measurement, so there is no layout flash on first paint and no server/client mismatch;
+- `prefers-reduced-motion` is honoured by the platform at the single place that decides how movement happens, rather than being threaded through component props;
+- interrupted transitions interpolate from the current computed value, so holding *next* stays smooth without any extra work.
+
+`motion` was uninstalled once nothing imported it. A dependency kept "in case" is one CONCEPT §43 explicitly warns against. The ESLint restriction on importing it into the domain layer is left in place, so re-adding it later cannot quietly cross a boundary.
 
 ### 7. The generated registry is committed
 

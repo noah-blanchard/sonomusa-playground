@@ -1,0 +1,58 @@
+/*
+ * Gallery frame placement.
+ *
+ * The values come from the tested pure functions in
+ * src/features/gallery/lib/depth.ts and arrive as custom properties. The
+ * transition itself is CSS rather than a JavaScript animation library, which
+ * buys three things that matter here:
+ *
+ *   1. the mobile arrangement is a media query rather than a viewport
+ *      measurement, so there is no layout flash on first paint and no
+ *      server/client mismatch;
+ *   2. `prefers-reduced-motion` is honoured by the platform, at the one place
+ *      that decides how movement happens;
+ *   3. interrupted transitions interpolate from the current computed value, so
+ *      pressing next repeatedly stays smooth for free.
+ */
+
+@layer components {
+  .gallery-frame {
+    position: absolute;
+    inset: 0;
+    transform-origin: center;
+
+    transform: translate3d(var(--frame-x), 0, 0) scale(var(--frame-scale));
+    opacity: var(--frame-opacity);
+
+    transition:
+      transform var(--duration-slow) var(--ease-standard),
+      opacity var(--duration-slow) var(--ease-standard);
+    will-change: transform, opacity;
+  }
+
+  /*
+   * Mobile is a reinterpretation, not a compression (CONCEPT §32): full-width
+   * frames, one at a time, no scaling.
+   */
+  @media (max-width: 767px) {
+    .gallery-frame {
+      transform: translate3d(var(--frame-x-sm), 0, 0);
+      opacity: var(--frame-opacity-sm);
+    }
+  }
+
+  /*
+   * Motion is enhancement, never structure. The spatial travel collapses to a
+   * short cross-fade; the state change stays plainly visible, and navigation
+   * remains complete.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-frame {
+      transform: none;
+      transition:
+        opacity var(--duration-fast) linear,
+        transform 0s;
+      will-change: opacity;
+    }
+  }
+}

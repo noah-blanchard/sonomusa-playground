@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './stencil.css';
+@import './gallery.css';
 
 /*
  * Shell baseline only. Everything visual is a token — see tokens.css and

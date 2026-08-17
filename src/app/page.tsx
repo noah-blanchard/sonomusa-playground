@@ -1,28 +1,101 @@
+import Link from 'next/link'
 import { PlaygroundIntro } from '@/components/shell/PlaygroundIntro'
+import { Label } from '@/components/ui/Label'
 import { StencilRule } from '@/components/ui/StencilRule'
+import { projectRepository } from '@/domain/project'
+import { GalleryViewport, ProjectFrame } from '@/features/gallery'
 
 /**
- * Home.
+ * Home — roughly 70% immersive, 30% informational (CONCEPT §20).
  *
- * The immersive gallery lands here in Phase 5. The editorial column and the
- * page rhythm are in place first, because they are the frame the gallery has
- * to sit inside — building the gallery first would let it dictate the layout
- * rather than the other way round.
+ * A Server Component. It loads projects, renders every frame on the server,
+ * and hands them to the client viewport as children. The only JavaScript that
+ * ships for the gallery is the interaction layer.
  */
-export default function HomePage() {
+export default async function HomePage() {
+  const projects = await projectRepository.getAll()
+
+  // The viewport needs names for labels and announcements; it never sees the
+  // projects themselves, which is what keeps it project-agnostic.
+  const items = projects.map((project) => ({ slug: project.slug, title: project.title }))
+
   return (
     <div className="mx-auto max-w-(--layout-max) px-(--layout-gutter-sm) sm:px-(--layout-gutter)">
-      <section className="flex min-h-dvh items-center pt-24">
-        <PlaygroundIntro />
+      <section className="grid min-h-dvh items-center gap-16 pt-28 pb-16 lg:grid-cols-[minmax(0,32%)_minmax(0,1fr)] lg:gap-12">
+        <PlaygroundIntro galleryHref="#gallery" />
+
+        <div id="gallery" className="scroll-mt-24">
+          {projects.length > 0 ? (
+            <GalleryViewport items={items}>
+              {projects.map((project, index) => (
+                <ProjectFrame
+                  key={project.slug}
+                  project={project}
+                  index={index}
+                  // Only the initially active frame is eager; everything else
+                  // stays lazy so first paint does not grow with the collection.
+                  priority={index === 0}
+                />
+              ))}
+            </GalleryViewport>
+          ) : (
+            <EmptyGallery />
+          )}
+        </div>
       </section>
 
-      <div className="flex items-center gap-6 pb-6">
+      <div className="flex items-center gap-6 pb-8">
         {/* Braced because a bare `//` in JSX children reads as a comment. */}
         <span aria-hidden className="font-mono text-xs text-(--color-text-secondary)">
           {'//'}
         </span>
         <StencilRule className="flex-1" variant="late" />
       </div>
+
+      <section className="pb-24">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <h2 className="font-display text-2xl font-light leading-(--leading-title) text-(--color-text-primary)">
+              Project
+              <br />
+              Index
+            </h2>
+            <p className="mt-5 max-w-[26ch] text-sm leading-(--leading-body) text-(--color-text-secondary)">
+              A growing collection of interactive works, generative systems and digital
+              explorations.
+            </p>
+          </div>
+
+          <Link href="/index" className="stencil-focus group inline-flex items-center gap-4 py-1">
+            <Label tone="primary" className="stencil-underline pb-2">
+              Browse all projects
+            </Label>
+            <span
+              aria-hidden
+              className="font-mono text-sm text-(--color-text-primary) transition-transform duration-(--duration-base) ease-(--ease-standard) group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+            >
+              →
+            </span>
+          </Link>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+/**
+ * The gallery must be presentable with zero projects — it is the state the
+ * repository starts in, and a broken empty state is a bad first impression for
+ * whoever clones this.
+ */
+function EmptyGallery() {
+  return (
+    <div className="stencil-frame flex h-[clamp(20rem,44vh,28rem)] flex-col items-center justify-center gap-4 bg-(--color-surface-raised) p-10 text-center">
+      <Label>No projects yet</Label>
+      <p className="max-w-[34ch] text-sm leading-(--leading-body) text-(--color-text-secondary)">
+        Add a directory under <span className="font-mono">src/content/projects/</span> with a
+        manifest and a poster, and it will appear here.
+      </p>
     </div>
   )
 }

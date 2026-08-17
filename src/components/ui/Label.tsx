@@ -1,4 +1,4 @@
-import type { ElementType, ReactNode } from 'react'
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react'
 
 /**
  * Tracked uppercase metadata label.
@@ -13,17 +13,19 @@ export function Label({
   children,
   className = '',
   tone = 'secondary',
+  ...rest
 }: {
   as?: ElementType
   children: ReactNode
   className?: string
   tone?: 'primary' | 'secondary'
-}) {
+} & Omit<ComponentPropsWithoutRef<'span'>, 'children' | 'className'>) {
   const color = tone === 'primary' ? 'text-(--color-text-primary)' : 'text-(--color-text-secondary)'
 
   return (
     <Tag
       className={`font-mono text-[0.6875rem] uppercase leading-none tracking-(--tracking-label) ${color} ${className}`}
+      {...rest}
     >
       {children}
     </Tag>
