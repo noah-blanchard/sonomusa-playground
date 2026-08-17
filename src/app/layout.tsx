@@ -15,6 +15,24 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: 'SonoMusa Playground',
     type: 'website',
+    /*
+     * The site-level default only. Project pages override `openGraph` wholesale
+     * in their own `generateMetadata` and supply their poster instead, so a
+     * shared project link shows the work rather than the gallery's front door.
+     */
+    images: [
+      {
+        url: '/og-default.png',
+        width: 1200,
+        height: 630,
+        alt: 'SonoMusa Playground — a gallery of coded experiences.',
+      },
+    ],
+  },
+  twitter: {
+    // Without this the card degrades to a thumbnail beside text, which for a
+    // gallery is the wrong way round.
+    card: 'summary_large_image',
   },
 }
 

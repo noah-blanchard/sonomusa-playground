@@ -29,6 +29,13 @@ import type { Project } from '../src/domain/project/types'
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const PROJECTS_DIR = join(ROOT, 'src', 'content', 'projects')
 const TMP_DIR = join(ROOT, '.next', 'placeholder-frames')
+/*
+ * The site-level Open Graph card. Committed rather than generated at build
+ * time: it is brand, not project media, so it changes when someone decides it
+ * should, not when a build runs. public/ is served directly and only
+ * public/projects/ is derived output.
+ */
+const OG_IMAGE = join(ROOT, 'public', 'og-default.png')
 
 const OBSIDIAN = '#0A0A0A'
 const BONE = '#F0EFEA'
@@ -36,6 +43,8 @@ const BONE = '#F0EFEA'
 const POSTER = { width: 1600, height: 1200 }
 const THUMBNAIL = { width: 800, height: 600 }
 const VIDEO = { width: 1280, height: 960, frames: 60, fps: 20 }
+/** The size every social platform crops from. */
+const OPEN_GRAPH = { width: 1200, height: 630 }
 
 // ── deterministic randomness ──────────────────────────────────────────────
 
@@ -274,6 +283,51 @@ function renderSvg(options: {
 </svg>`
 }
 
+/**
+ * The site's default Open Graph card — what a bare link to the gallery shows.
+ *
+ * Per-project links already resolve to their own poster through
+ * `generateMetadata`, so this is only the site-level fallback. Drawn with the
+ * same primitives as everything else here rather than through `next/og`: that
+ * would pull a rendering runtime into the build for one static asset that
+ * changes when the brand does, which is to say almost never.
+ *
+ * The arcs family, because interrupted concentric arcs are the logo's own
+ * device — the one composition of the six that is the shell speaking rather
+ * than a project.
+ */
+function renderOpenGraph(): string {
+  const { width, height } = OPEN_GRAPH
+  const body = arcs({ width, height, random: makeRandom(hashOf('sonomusa')), phase: 0 })
+
+  const inset = 40
+  const gap = 72
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <rect width="${width}" height="${height}" fill="${OBSIDIAN}"/>
+  <g opacity="0.5">${body}</g>
+  <linearGradient id="scrim" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="${OBSIDIAN}" stop-opacity="0.96"/>
+    <stop offset="62%" stop-color="${OBSIDIAN}" stop-opacity="0.55"/>
+    <stop offset="100%" stop-color="${OBSIDIAN}" stop-opacity="0.2"/>
+  </linearGradient>
+  <rect width="${width}" height="${height}" fill="url(#scrim)"/>
+  <g stroke="${BONE}" stroke-width="1" opacity="0.2">
+    <line x1="${inset + gap}" y1="${inset}" x2="${width - inset - gap}" y2="${inset}"/>
+    <line x1="${inset + gap}" y1="${height - inset}" x2="${width - inset - gap}" y2="${height - inset}"/>
+    <line x1="${inset}" y1="${inset + gap}" x2="${inset}" y2="${height - inset - gap}"/>
+    <line x1="${width - inset}" y1="${inset + gap}" x2="${width - inset}" y2="${height - inset - gap}"/>
+  </g>
+  <text x="112" y="252" fill="${BONE}" font-family="ui-sans-serif, sans-serif"
+        font-size="88" font-weight="300" letter-spacing="-1.5">A gallery of</text>
+  <text x="112" y="348" fill="${BONE}" font-family="ui-sans-serif, sans-serif"
+        font-size="88" font-weight="300" letter-spacing="-1.5">coded experiences.</text>
+  <line x1="112" y1="404" x2="360" y2="404" stroke="${BONE}" stroke-width="1" opacity="0.32"/>
+  <text x="112" y="452" fill="${BONE}" opacity="0.62" font-family="ui-monospace, monospace"
+        font-size="22" letter-spacing="4">SONOMUSA PLAYGROUND</text>
+</svg>`
+}
+
 async function writeImage(svg: string, target: string) {
   await mkdir(dirname(target), { recursive: true })
   await sharp(Buffer.from(svg)).webp({ quality: 88 }).toFile(target)
@@ -345,8 +399,19 @@ function declaredAssets(project: Project): { file: string; kind: 'image' | 'vide
 }
 
 async function main() {
+  // Not tied to the content directory: the site has an identity whether or not
+  // any project exists yet, and an empty gallery still gets shared.
+  if (!existsSync(OG_IMAGE)) {
+    await mkdir(dirname(OG_IMAGE), { recursive: true })
+    // PNG rather than the webp used everywhere else — several Open Graph
+    // consumers still will not render webp, and this is the one image whose
+    // entire job is being rendered by someone else's software.
+    await sharp(Buffer.from(renderOpenGraph())).png().toFile(OG_IMAGE)
+    console.log('  + public/og-default.png')
+  }
+
   if (!existsSync(PROJECTS_DIR)) {
-    console.log('✓ No content directory yet — nothing to generate.')
+    console.log('✓ No content directory yet — nothing else to generate.')
     return
   }
 
