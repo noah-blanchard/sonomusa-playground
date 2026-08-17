@@ -22,7 +22,9 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [['github'], ['list']] : [['list']],
+  // The HTML report exists for CI, where a failure otherwise leaves no trace of
+  // what the page actually looked like. Locally the list output is enough.
+  reporter: process.env.CI ? [['github'], ['list'], ['html', { open: 'never' }]] : [['list']],
 
   use: {
     baseURL: 'http://localhost:3000',

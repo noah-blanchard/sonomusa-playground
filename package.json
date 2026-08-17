@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "bun@1.3.14",
   "description": "An evolving, immersive digital gallery for SonoMusa projects.",
   "scripts": {
     "dev": "bun run content:prepare && next dev",
