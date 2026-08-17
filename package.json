@@ -1,0 +1,50 @@
+{
+  "name": "sonomusa-playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "An evolving, immersive digital gallery for SonoMusa projects.",
+  "scripts": {
+    "dev": "bun run registry:generate && next dev",
+    "build": "bun run registry:generate && next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "registry:generate": "bun scripts/generate-registry.ts",
+    "registry:check": "bun scripts/generate-registry.ts --check",
+    "validate:content": "bun scripts/validate-content.ts",
+    "check:architecture": "bun scripts/check-architecture.ts",
+    "media:placeholders": "bun scripts/generate-placeholder-media.ts",
+    "verify": "bun run registry:check && bun run validate:content && bun run check:architecture && bun run typecheck && bun run lint && bun run test && bun run build"
+  },
+  "dependencies": {
+    "motion": "13.1.0",
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "sharp": "0.35.3",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "eslint": "10.8.1",
+    "eslint-config-next": "16.3.1",
+    "happy-dom": "20.11.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.67.0",
+    "vitest": "4.1.10"
+  },
+  "trustedDependencies": [
+    "unrs-resolver"
+  ]
+}

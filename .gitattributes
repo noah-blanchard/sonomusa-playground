@@ -1,0 +1,18 @@
+# Normalize line endings so the repo is identical on Windows, macOS and the
+# Linux build container used by Dokploy.
+* text=auto eol=lf
+
+# Binary assets — never touch these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.mp4 binary
+*.woff binary
+*.woff2 binary
+*.ico binary
+
+# Generated: collapse in diffs, but still reviewable when needed.
+src/content/projects/registry.generated.ts linguist-generated=true
+bun.lock -diff
