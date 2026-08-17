@@ -15,9 +15,22 @@ import { ProjectNumber } from '@/components/ui/ProjectNumber'
  *
  * A Server Component. The whole index ships no JavaScript.
  */
-export function ProjectIndexCard({ project, index }: { project: Project; index: number }) {
+export function ProjectIndexCard({
+  project,
+  index,
+  className,
+}: {
+  project: Project
+  index: number
+  /**
+   * Placement only — sizing and snap behaviour belong to whichever list is
+   * holding the card. The grid needs nothing; the horizontal strip needs a
+   * width. Everything inside the card stays the card's own business.
+   */
+  className?: string
+}) {
   return (
-    <li>
+    <li className={className}>
       <Link
         href={`/projects/${project.slug}`}
         className="stencil-focus stencil-frame group flex h-full flex-col bg-(--color-surface-raised) p-4 transition-colors duration-(--duration-base) hover:bg-(--color-surface-well)"

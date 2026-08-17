@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/Label'
 import { StencilRule } from '@/components/ui/StencilRule'
 import { projectRepository } from '@/domain/project'
 import { GalleryViewport, ProjectFrame } from '@/features/gallery'
+import { ProjectIndexStrip } from '@/features/project-index'
 
 /**
  * Home — roughly 70% immersive, 30% informational (CONCEPT §20).
@@ -53,7 +54,7 @@ export default async function HomePage() {
       </div>
 
       <section className="pb-24">
-        <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
             <h2 className="font-display text-2xl font-light leading-(--leading-title) text-(--color-text-primary)">
               Project
@@ -78,6 +79,8 @@ export default async function HomePage() {
             </span>
           </Link>
         </div>
+
+        <ProjectIndexStrip projects={projects} />
       </section>
     </div>
   )
