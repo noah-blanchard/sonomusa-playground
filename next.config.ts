@@ -30,6 +30,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
   },
 
+  // Phosphor ships 9,000+ modules and is not in Next's default-optimized list,
+  // so without this the dev server transpiles the whole set on first import.
+  // See node_modules/next/dist/docs/01-app/02-guides/package-bundling.md.
+  experimental: {
+    optimizePackageImports: ['@phosphor-icons/react'],
+  },
+
   // Do not leak the framework version in response headers.
   poweredByHeader: false,
 }

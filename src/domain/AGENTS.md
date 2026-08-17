@@ -2,7 +2,7 @@
 
 **This layer is pure TypeScript. It renders nothing.**
 
-- No `react`, `react-dom`, `next`, or `motion` imports. Ever. ESLint enforces it.
+- No `react`, `react-dom` or `next` imports. Ever. Nor any rendering library — `motion`, `ogl`, `@phosphor-icons/react`. ESLint enforces it.
 - No imports from `@/features`, `@/app`, `@/components` or `@/styles`.
 - No imports from `@/content` — except `repository/sources/**`, the one documented seam.
 

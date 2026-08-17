@@ -27,6 +27,10 @@ const RENDERING_MODULES = [
   { name: 'next', message: 'The domain layer must stay framework-agnostic. See docs/rules/01-architecture.md.' },
   { name: 'motion', message: 'Animation is a presentation concern and does not belong in the domain layer.' },
   { name: 'motion/react', message: 'Animation is a presentation concern and does not belong in the domain layer.' },
+  { name: 'motion/react-client', message: 'Animation is a presentation concern and does not belong in the domain layer.' },
+  { name: 'ogl', message: 'Rendering belongs to a preview or to the shell, never to the domain layer.' },
+  { name: '@phosphor-icons/react', message: 'Icons are presentation. The domain layer describes projects, it does not draw them.' },
+  { name: '@phosphor-icons/react/ssr', message: 'Icons are presentation. The domain layer describes projects, it does not draw them.' },
 ]
 
 export default tseslint.config(
