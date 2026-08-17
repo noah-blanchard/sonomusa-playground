@@ -17,6 +17,7 @@
 
 import { existsSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -28,10 +29,17 @@ import { fileURLToPath } from 'node:url'
  */
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const OUT_DIR = join(ROOT, '.shots')
-const PROFILE_DIR = join(ROOT, '.shots', '.browser-profile')
+/*
+ * Outside the output directory on purpose. It used to live under `.shots/`,
+ * which the script clears on every run — so a second run deleted the profile of
+ * a browser that had not finished exiting from the first.
+ */
+const PROFILE_DIR = join(tmpdir(), 'sonomusa-capture-shots-profile')
 
 const BASE_URL = 'http://localhost:3000'
 const DEBUG_PORT = 9222
+/** No CDP call here takes seconds. Waiting forever on a dead target does. */
+const CALL_TIMEOUT_MS = 20_000
 
 const BREAKPOINTS = [
   { name: 'mobile', width: 390, height: 844 },
@@ -100,8 +108,21 @@ async function connect(): Promise<Session> {
     send(method, params = {}) {
       nextId += 1
       const id = nextId
-      return new Promise((resolve) => {
-        pending.set(id, resolve)
+      return new Promise((resolve, reject) => {
+        /*
+         * Every call is bounded. Without this, attaching to a browser whose
+         * page target has gone away leaves the promise pending forever and the
+         * script hangs with no output at all — which is precisely what it did.
+         */
+        const timer = setTimeout(() => {
+          pending.delete(id)
+          reject(new Error(`${method} did not answer within ${CALL_TIMEOUT_MS}ms.`))
+        }, CALL_TIMEOUT_MS)
+
+        pending.set(id, (value) => {
+          clearTimeout(timer)
+          resolve(value)
+        })
         socket.send(JSON.stringify({ id, method, params }))
       })
     },
@@ -153,8 +174,29 @@ async function main() {
     process.exit(1)
   }
 
+  /*
+   * A browser already holding the port is almost always one this script left
+   * behind. Attaching to it looks like it works right up until a call never
+   * comes back, so refuse instead of guessing.
+   */
+  let portInUse = false
+  try {
+    await fetch(`http://localhost:${DEBUG_PORT}/json/version`)
+    portInUse = true
+  } catch {
+    // Free, which is what we want.
+  }
+  if (portInUse) {
+    console.error(
+      `✗ Something is already listening on ${DEBUG_PORT} — probably a headless browser left over ` +
+        'from an earlier run. Close it and try again.',
+    )
+    process.exit(1)
+  }
+
   await rm(OUT_DIR, { recursive: true, force: true })
   await mkdir(OUT_DIR, { recursive: true })
+  await rm(PROFILE_DIR, { recursive: true, force: true })
 
   const child = Bun.spawn(
     [
@@ -211,7 +253,15 @@ async function main() {
         // settle. A shot taken mid-transition is worse than no shot.
         await Bun.sleep(1800)
 
-        const shot = await session.send('Page.captureScreenshot', { format: 'png' })
+        /*
+         * The whole page, not the viewport. Half of what is worth checking
+         * lives below the fold — it was a viewport-only shot that let the
+         * gallery's neighbours look fine while the page scrolled sideways.
+         */
+        const shot = await session.send('Page.captureScreenshot', {
+          format: 'png',
+          captureBeyondViewport: true,
+        })
         const target = join(OUT_DIR, fileNameFor(route, breakpoint.name))
         await Bun.write(target, Buffer.from(shot.result?.data ?? shot.data, 'base64'))
         written += 1
