@@ -1,0 +1,31 @@
+# Keep the build context small and the image reproducible.
+
+node_modules
+.next
+out
+build
+coverage
+
+.git
+.gitignore
+.gitattributes
+
+# Generated inside the image by `bun run build`. Copying a host-built copy in
+# would mask a broken sync step.
+public/projects
+
+.env
+.env*.local
+
+Dockerfile
+.dockerignore
+README.md
+
+# Reference material, not application source.
+Concept/
+
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.log
