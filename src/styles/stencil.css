@@ -1,0 +1,149 @@
+/*
+ * The stencil motif.
+ *
+ * Every glyph in the SonoMusa logo is interrupted — cut bowls, broken stems, an
+ * unbarred A. That gap is the identity, and it is a system rather than an
+ * effect, which is exactly what CONCEPT §25 asks for: the brand is recognizable
+ * without depending on glow, particles or a signature shader.
+ *
+ * These primitives propagate the gap through the shell. Reach for one of them
+ * before reaching for a colour or a shadow.
+ *
+ * Note these are single deliberate breaks, not dashes. A dashed border is a
+ * generic pattern; one clean interruption is the logo's actual language.
+ */
+
+@layer components {
+  /*
+   * A hairline with one break. The default sits left of centre so the rule
+   * reads as deliberately cut rather than accidentally symmetrical.
+   */
+  .stencil-rule {
+    --stencil-break-start: 34%;
+    --stencil-break-end: 37.5%;
+
+    height: var(--hairline);
+    width: 100%;
+    background-image: linear-gradient(
+      to right,
+      var(--color-line) 0 var(--stencil-break-start),
+      transparent var(--stencil-break-start) var(--stencil-break-end),
+      var(--color-line) var(--stencil-break-end) 100%
+    );
+  }
+
+  /* Break near the end instead — for rules that sit under a heading. */
+  .stencil-rule-late {
+    --stencil-break-start: 78%;
+    --stencil-break-end: 82%;
+  }
+
+  .stencil-rule-strong {
+    background-image: linear-gradient(
+      to right,
+      var(--color-line-strong) 0 var(--stencil-break-start),
+      transparent var(--stencil-break-start) var(--stencil-break-end),
+      var(--color-line-strong) var(--stencil-break-end) 100%
+    );
+  }
+
+  /*
+   * A frame whose corners are open.
+   *
+   * Four edge segments inset from each corner, drawn as backgrounds so no
+   * extra DOM is needed. This is the exhibition frame the gallery cards and
+   * the index cards both use.
+   */
+  .stencil-frame {
+    --stencil-gap: 1.25rem;
+
+    background-image:
+      linear-gradient(var(--color-line), var(--color-line)),
+      linear-gradient(var(--color-line), var(--color-line)),
+      linear-gradient(var(--color-line), var(--color-line)),
+      linear-gradient(var(--color-line), var(--color-line));
+    background-size:
+      calc(100% - var(--stencil-gap) * 2) var(--hairline),
+      calc(100% - var(--stencil-gap) * 2) var(--hairline),
+      var(--hairline) calc(100% - var(--stencil-gap) * 2),
+      var(--hairline) calc(100% - var(--stencil-gap) * 2);
+    background-position:
+      var(--stencil-gap) 0,
+      var(--stencil-gap) 100%,
+      0 var(--stencil-gap),
+      100% var(--stencil-gap);
+    background-repeat: no-repeat;
+  }
+
+  .stencil-frame-strong {
+    background-image:
+      linear-gradient(var(--color-line-strong), var(--color-line-strong)),
+      linear-gradient(var(--color-line-strong), var(--color-line-strong)),
+      linear-gradient(var(--color-line-strong), var(--color-line-strong)),
+      linear-gradient(var(--color-line-strong), var(--color-line-strong));
+  }
+
+  /*
+   * Focus that breaks rather than disappears.
+   *
+   * A visible focus ring is non-negotiable (docs/rules/05-experience.md); this
+   * only changes its shape so the shell stays coherent. Drawn on a pseudo
+   * element because an `outline` cannot be interrupted.
+   */
+  .stencil-focus {
+    position: relative;
+  }
+
+  .stencil-focus:focus-visible {
+    outline: none;
+  }
+
+  .stencil-focus:focus-visible::after {
+    --stencil-gap: 0.75rem;
+
+    content: '';
+    position: absolute;
+    inset: -0.4rem;
+    pointer-events: none;
+
+    background-image:
+      linear-gradient(var(--color-accent), var(--color-accent)),
+      linear-gradient(var(--color-accent), var(--color-accent)),
+      linear-gradient(var(--color-accent), var(--color-accent)),
+      linear-gradient(var(--color-accent), var(--color-accent));
+    background-size:
+      calc(100% - var(--stencil-gap) * 2) var(--hairline),
+      calc(100% - var(--stencil-gap) * 2) var(--hairline),
+      var(--hairline) calc(100% - var(--stencil-gap) * 2),
+      var(--hairline) calc(100% - var(--stencil-gap) * 2);
+    background-position:
+      var(--stencil-gap) 0,
+      var(--stencil-gap) 100%,
+      0 var(--stencil-gap),
+      100% var(--stencil-gap);
+    background-repeat: no-repeat;
+  }
+
+  /*
+   * An underline that retracts to a gap on hover — the logo's move applied to
+   * an interaction. Used by primary editorial links.
+   */
+  .stencil-underline {
+    background-image: linear-gradient(var(--color-line-strong), var(--color-line-strong));
+    background-size: 100% var(--hairline);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size var(--duration-base) var(--ease-standard);
+  }
+
+  .stencil-underline:hover {
+    background-size: 100% var(--hairline);
+    background-image: linear-gradient(var(--color-accent), var(--color-accent));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stencil-underline {
+      transition: none;
+    }
+  }
+}

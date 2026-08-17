@@ -157,12 +157,45 @@ async function checkContentIsolation() {
   }
 }
 
+/**
+ * Tailwind v4: `tracking-[--token]` emits `letter-spacing: --token`, which is
+ * invalid CSS that browsers drop silently. Nothing errors — the style simply
+ * does not apply. Only `tracking-(--token)` expands to `var(--token)`.
+ *
+ * Cheap to check, genuinely hard to notice by eye, so it is checked.
+ */
+async function checkTokenSyntax() {
+  const files = [
+    ...(await filesIn('src/**/*.{ts,tsx}')),
+  ]
+
+  const bracketVar = /[a-z-]+-\[--[a-z-]+\]/
+
+  for (const file of files) {
+    const source = await Bun.file(file).text()
+
+    source.split('\n').forEach((line, index) => {
+      const match = bracketVar.exec(line)
+      if (match) {
+        violations.push({
+          file: rel(file),
+          line: index + 1,
+          rule: 'Design token syntax',
+          detail: `"${match[0]}" emits invalid CSS and is silently dropped`,
+          fix: `Use the parenthesis form: ${match[0].replace('[', '(').replace(']', ')')}`,
+        })
+      }
+    })
+  }
+}
+
 async function main() {
   const slugs = await knownSlugs()
 
   await checkNoProjectNamesInSharedCode(slugs)
   await checkDomainPurity()
   await checkContentIsolation()
+  await checkTokenSyntax()
 
   if (violations.length > 0) {
     console.error(`\n✗ ${violations.length} architectural violation(s)\n`)

@@ -32,6 +32,12 @@ Reach for the gap before reaching for a colour, a shadow or a glow.
 
 Every visual value lives in `src/styles/tokens.css` under Tailwind's `@theme`. No arbitrary literals in components — if you need a value that does not exist, add a token and say why.
 
+> **Use `tracking-(--token)`, never `tracking-[--token]`.**
+>
+> In Tailwind v4 the parenthesis form is shorthand for `var(--token)`; the bracket form passes the text through raw and emits `letter-spacing: --tracking-label`, which is invalid CSS that browsers drop silently. Nothing errors — the style just does not apply, and a tracked label quietly loses the tracking that makes it read as editorial.
+>
+> This applies to every token-valued utility: `text-(--color-bone)`, `duration-(--duration-fast)`, `leading-(--leading-body)`. Grep for `\[--` before shipping; there should be no matches.
+
 ### Colour
 
 | Token | Value | Role |
