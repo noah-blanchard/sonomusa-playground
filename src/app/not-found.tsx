@@ -31,7 +31,7 @@ export default function NotFound() {
               Playground
             </Label>
           </Link>
-          <Link href="/index" className="stencil-focus">
+          <Link href="/projects" className="stencil-focus">
             <Label tone="primary" className="stencil-underline pb-2">
               All projects
             </Label>

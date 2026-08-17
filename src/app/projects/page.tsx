@@ -15,6 +15,13 @@ export const metadata: Metadata = {
  * Entirely server-rendered — no JavaScript ships for this route. It is also
  * where every project page is linked from, which is what keeps the detail
  * pages crawlable given that the gallery's own call to action leaves the site.
+ *
+ * Lives at /projects, NOT /index. `app/index/page.tsx` builds and is listed in
+ * the route table, but the router normalizes /index to / and silently serves
+ * the home page instead — the build gives no warning at all. /projects is also
+ * the better shape, since /projects/[slug] already sits beneath it.
+ *
+ * The nav still labels it "Index"; that is the editorial name, not the path.
  */
 export default async function ProjectIndexPage() {
   const projects = await projectRepository.getAll()

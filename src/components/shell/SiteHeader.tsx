@@ -16,7 +16,7 @@ import { InfoOverlay } from './InfoOverlay'
 
 const SECTIONS = [
   { href: '/', label: 'Playground' },
-  { href: '/index', label: 'Index' },
+  { href: '/projects', label: 'Index' },
 ] as const
 
 export function SiteHeader() {
@@ -49,7 +49,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-6">
           {/* Below md the centred nav is hidden, so Index needs a home here. */}
           <Link
-            href="/index"
+            href="/projects"
             className="stencil-focus block py-1 text-(--color-text-secondary) transition-colors duration-(--duration-fast) hover:text-(--color-text-primary) md:hidden"
           >
             <Label>Index</Label>

@@ -205,7 +205,7 @@ export default async function ProjectPage({ params }: Params) {
       )}
 
       <nav className="mt-24" aria-label="Back">
-        <Link href="/index" className="stencil-focus group inline-flex items-center gap-4 py-1">
+        <Link href="/projects" className="stencil-focus group inline-flex items-center gap-4 py-1">
           <span
             aria-hidden
             className="font-mono text-sm text-(--color-text-secondary) transition-transform duration-(--duration-base) group-hover:-translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"

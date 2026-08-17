@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import { lazy, type ComponentType } from 'react'
 
 /**
  * Interactive previews implemented in this repository, keyed by `componentId`.
@@ -27,7 +27,9 @@ export interface ComponentPreviewProps {
 
 export type ComponentPreviewModule = ComponentType<ComponentPreviewProps>
 
-export const componentPreviewRegistry: Record<string, ComponentPreviewModule> = {}
+export const componentPreviewRegistry: Record<string, ComponentPreviewModule> = {
+  'musai-preview': lazy(() => import('@/content/projects/musai/preview')),
+}
 
 export function resolveComponentPreview(componentId: string): ComponentPreviewModule | null {
   return componentPreviewRegistry[componentId] ?? null

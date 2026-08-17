@@ -155,11 +155,53 @@ export default tseslint.config(
       'no-restricted-imports': [
         'error',
         {
+          paths: [
+            {
+              /*
+               * Importing the domain barrel from a manifest creates a cycle:
+               * manifest → barrel → repository → local source → generated
+               * registry → manifest. It surfaces as "Cannot access X before
+               * initialization", which points nowhere near the cause, so it is
+               * blocked here where the message can say what to do instead.
+               */
+              name: '@/domain/project',
+              message:
+                "Import the narrow path instead: `from '@/domain/project/defineProject'`. The barrel pulls in the repository, which reads the registry, which imports this file — a cycle.",
+            },
+          ],
           patterns: [
             {
               group: ['@/features/*', '@/app/*', '@/components/*', '@/styles/*'],
               message:
                 'A project manifest is data. It must not import UI. Interactive previews register a componentId instead. See docs/rules/02-content.md.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  /*
+   * A project's own preview component is UI, so it may import the preview
+   * feature's public types — but the same cycle rule applies to the domain.
+   */
+  {
+    files: ['src/content/**/*.tsx'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/domain/project',
+              message:
+                "Import the narrow path instead — the barrel pulls in the repository, which reads the registry, which imports this project.",
+            },
+          ],
+          patterns: [
+            {
+              group: ['@/app/*'],
+              message: 'Imports flow downward only — project code cannot depend on routes.',
             },
           ],
         },
