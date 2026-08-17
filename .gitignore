@@ -15,6 +15,10 @@ dist/
 # testing
 coverage/
 .vitest/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
 
 # misc
 .DS_Store
