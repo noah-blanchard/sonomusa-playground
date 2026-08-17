@@ -1,0 +1,47 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# production
+build/
+dist/
+
+# testing
+coverage/
+.vitest/
+
+# misc
+.DS_Store
+*.pem
+Thumbs.db
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env — never commit real values
+.env
+.env*.local
+!.env.example
+
+# vercel
+.vercel/
+
+# typescript
+*.tsbuildinfo
+
+# editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# NOTE: src/content/projects/registry.generated.ts is intentionally COMMITTED.
+# See docs/rules/01-architecture.md — reproducible builds and visible diffs.
