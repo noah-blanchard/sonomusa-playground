@@ -16,9 +16,51 @@
  */
 
 @layer components {
+  /*
+   * The stage. Two responsibilities, and they are not the same one:
+   *
+   *   `overflow: hidden` is the guarantee. Neighbours are translated and scaled
+   *   past the column edges, and without clipping they widen the document's
+   *   scrollable area — which is what shipped: ~696px of horizontal page scroll
+   *   at 1440, with the two furthest neighbours painting over the headline.
+   *
+   *   The mask is the finish. Clipping alone ends a neighbour on a crisp
+   *   vertical line, which reads as a cropped card rather than as depth; the
+   *   gradient dissolves it into the background instead. It is NOT a substitute
+   *   for the clip — transparent pixels still contribute to scroll width.
+   *
+   * The active frame lives between 18% and 82% (see .gallery-frame), so the
+   * gradient's 0–7% and 93–100% bands only ever touch a neighbour.
+   */
+  .gallery-viewport {
+    overflow: hidden;
+
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 7%,
+      #000 93%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+  }
+
+  /*
+   * The frame is inset so that the margins either side are what the neighbours
+   * peek into (CONCEPT §22, ConceptArt.png). `left`/`right` rather than a width
+   * plus a negative margin: the 64% falls out on its own, and the mobile
+   * override below is two lines.
+   *
+   * 18% is duplicated as FRAME_INSET in src/features/gallery/lib/depth.ts,
+   * which derives the neighbour offsets from it. CSS cannot import from
+   * TypeScript — change both or neither.
+   */
   .gallery-frame {
     position: absolute;
-    inset: 0;
+    top: 0;
+    bottom: 0;
+    left: 18%;
+    right: 18%;
     transform-origin: center;
 
     transform: translate3d(var(--frame-x), 0, 0) scale(var(--frame-scale));
@@ -36,8 +78,20 @@
    */
   @media (max-width: 767px) {
     .gallery-frame {
+      left: 0;
+      right: 0;
       transform: translate3d(var(--frame-x-sm), 0, 0);
       opacity: var(--frame-opacity-sm);
+    }
+
+    /*
+     * The mask has to go with it. Here the active frame spans the full width,
+     * so the gradient would fade the edges of the project being looked at
+     * rather than a neighbour's.
+     */
+    .gallery-viewport {
+      -webkit-mask-image: none;
+      mask-image: none;
     }
   }
 

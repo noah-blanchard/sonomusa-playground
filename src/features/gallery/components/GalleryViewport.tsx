@@ -65,7 +65,7 @@ export function GalleryViewport({
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
-        className="relative h-[clamp(24rem,58vh,34rem)] touch-pan-y select-none"
+        className="gallery-viewport relative h-[clamp(24rem,58vh,34rem)] touch-pan-y select-none"
       >
         <PreviewActivationProvider
           activeSlug={active?.slug ?? null}

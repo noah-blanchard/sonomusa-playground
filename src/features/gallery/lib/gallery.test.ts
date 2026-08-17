@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { depthStyle, mobileDepthStyle, signedOffset, VISIBLE_NEIGHBOURS } from './depth'
+import {
+  depthStyle,
+  FRAME_INSET,
+  mobileDepthStyle,
+  neighbourRightEdge,
+  signedOffset,
+  VISIBLE_NEIGHBOURS,
+} from './depth'
 import { createGalleryState, galleryReducer, type GalleryState } from './galleryReducer'
 
 /** Applies a sequence, for testing journeys rather than single steps. */
@@ -178,6 +185,59 @@ describe('depthStyle', () => {
       expect(depthStyle(1, { reducedMotion: true }).rendered).toBe(true)
       expect(depthStyle(3, { reducedMotion: true }).rendered).toBe(false)
     })
+  })
+})
+
+/**
+ * The composition depends on three numbers agreeing: the frame inset in
+ * gallery.css, and `x` and `scale` from depthStyle. The viewport clips, so a
+ * disagreement does not break the page — it silently produces either a gap
+ * beside the active frame or a neighbour covering it. Nothing but this catches
+ * that.
+ */
+describe('the peek geometry', () => {
+  /** Where a left-hand neighbour's right edge lands, in column fractions. */
+  function edgeAt(distance: number): number {
+    const { x, scale } = depthStyle(-distance)
+
+    return neighbourRightEdge(FRAME_INSET, x, scale)
+  }
+
+  it('fills the whole margin beside the active frame', () => {
+    // Anything short of the inset leaves a strip of empty background between
+    // the neighbour and the frame, which reads as a broken layout.
+    expect(edgeAt(1)).toBeGreaterThan(FRAME_INSET)
+  })
+
+  it('tucks only just under the active frame', () => {
+    // It has to overlap — a butt joint shows a seam — but the active project
+    // is the subject, so the intrusion stays small. It is covered anyway:
+    // zIndex 30 over 29.
+    expect(edgeAt(1)).toBeLessThan(FRAME_INSET + 0.05)
+    expect(depthStyle(0).zIndex).toBeGreaterThan(depthStyle(1).zIndex)
+  })
+
+  it('keeps the far neighbour entirely off-stage', () => {
+    // Mounted for the transition, never seen.
+    expect(edgeAt(2)).toBeLessThan(0)
+  })
+
+  it('is symmetrical', () => {
+    const right = depthStyle(1)
+    const rightLeftEdge = 1 - neighbourRightEdge(FRAME_INSET, -right.x, right.scale)
+
+    expect(rightLeftEdge).toBeCloseTo(1 - edgeAt(1), 10)
+  })
+
+  it('reduces to the frame itself for the active offset', () => {
+    const active = depthStyle(0)
+
+    // A sanity check on the maths rather than on the tuning: an unmoved,
+    // unscaled frame ends exactly where CSS puts it.
+    expect(neighbourRightEdge(FRAME_INSET, active.x, active.scale)).toBeCloseTo(
+      1 - FRAME_INSET,
+      10,
+    )
   })
 })
 

@@ -9,8 +9,51 @@
  * Pure maths, so the whole visual model is testable without a browser.
  */
 
-/** How many frames stay visible either side of the active one. */
+/**
+ * How many frames stay mounted either side of the active one.
+ *
+ * Distance-2 frames are clipped out of sight by `.gallery-viewport`, which
+ * makes this look like it should be 1. It must not be. A frame that is not
+ * rendered mounts at its final position with no previous value to transition
+ * from, so it pops into place instead of sliding in — the distance-2 frame is
+ * what gives the arriving neighbour somewhere to travel from.
+ */
 export const VISIBLE_NEIGHBOURS = 2
+
+/**
+ * How far `.gallery-frame` is inset on each side, as a fraction of the gallery
+ * column. The active frame therefore occupies the middle 64%, and the two 18%
+ * margins are what neighbours peek into.
+ *
+ * Duplicated as `left`/`right` on `.gallery-frame` in src/styles/gallery.css.
+ * CSS cannot import from TypeScript, so the two must be changed together —
+ * `neighbourRightEdge` below is what tells you when they have drifted apart.
+ */
+export const FRAME_INSET = 0.18
+
+/**
+ * Where a left-hand neighbour's right edge lands, as a fraction of the gallery
+ * column, given the frame inset and that neighbour's offset and scale.
+ *
+ * CSS `translate` percentages resolve against the element's own width and
+ * `transform-origin` is `center`, so for a frame of width `F = 1 - 2·inset`:
+ *
+ *   centre     = 0.5 + (x / 100) · F
+ *   half-width = (F / 2) · scale
+ *   right edge = centre + half-width
+ *
+ * The peek is only correct when three numbers agree — the CSS inset, and `x`
+ * and `scale` from `depthStyle`. Nothing else connects them, so this exists to
+ * be asserted on: retune one of the three and the test says the peek broke,
+ * rather than leaving it for a screenshot months later.
+ *
+ * Mirror it for a right-hand neighbour: its left edge is `1 - f(inset, -x, s)`.
+ */
+export function neighbourRightEdge(inset: number, x: number, scale: number): number {
+  const width = 1 - inset * 2
+
+  return 0.5 + (x / 100) * width + (width / 2) * scale
+}
 
 export interface DepthStyle {
   /** Horizontal offset as a percentage of the frame's own width. */
@@ -82,11 +125,20 @@ export function depthStyle(offset: number, options: { reducedMotion?: boolean } 
     }
   }
 
-  // Spacing compresses with distance so the stack reads as receding depth
-  // rather than as evenly spaced cards.
-  const x = direction * (62 + (distance - 1) * 34)
-  const scale = 1 - distance * 0.13
-  const opacity = distance === 1 ? 0.45 : 0.18
+  /*
+   * Tuned against the 18% margin rather than chosen by eye. At distance 1 the
+   * right edge lands at ~0.199 of the column: the neighbour fills the whole
+   * margin and slips ~2% under the active frame, which sits above it at
+   * zIndex 30 vs 29, so there is no seam and no gap. Distance 2 computes to
+   * ~-0.018 — fully off-stage, mounted only so the next arrival has somewhere
+   * to come from.
+   *
+   * Spacing still compresses with distance, so the stack reads as receding
+   * depth rather than as evenly spaced cards.
+   */
+  const x = direction * (91 + (distance - 1) * 29)
+  const scale = 0.88 - (distance - 1) * 0.1
+  const opacity = distance === 1 ? 0.5 : 0.2
 
   return {
     x,
@@ -112,7 +164,9 @@ export function mobileDepthStyle(offset: number): DepthStyle {
   }
 
   return {
-    x: Math.sign(offset) * 104,
+    // Frames are full-width here, so anything past 100 is off-screen. The
+    // margin above that is what keeps a fast swipe from revealing an edge.
+    x: Math.sign(offset) * 110,
     scale: 1,
     opacity: 0,
     zIndex: 0,
