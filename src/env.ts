@@ -43,3 +43,17 @@ if (!parsed.success) {
 export const env = parsed.data
 
 export type Env = typeof env
+
+/**
+ * The canonical origin, with the development fallback applied once.
+ *
+ * `sitemap.ts` and `robots.ts` need absolute URLs and cannot express "unset",
+ * so something has to decide what an unconfigured origin means. Deciding it
+ * here keeps that answer in one place rather than repeating a `?? localhost`
+ * in every consumer — and it is the same value Next already falls back to for
+ * `metadataBase`, so setting it explicitly changes nothing except that the
+ * build stops warning about it.
+ *
+ * Set NEXT_PUBLIC_SITE_URL in Dokploy and production emits real canonical URLs.
+ */
+export const siteOrigin = env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'

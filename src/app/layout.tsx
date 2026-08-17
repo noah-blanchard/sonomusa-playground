@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from 'next'
 import { SiteFooter } from '@/components/shell/SiteFooter'
 import { SiteHeader } from '@/components/shell/SiteHeader'
-import { env } from '@/env'
+import { siteOrigin } from '@/env'
 import { fontVariables } from '@/styles/fonts'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
-  ...(env.NEXT_PUBLIC_SITE_URL && { metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL) }),
+  metadataBase: new URL(siteOrigin),
   title: {
     default: 'SonoMusa Playground',
     template: '%s — SonoMusa Playground',
