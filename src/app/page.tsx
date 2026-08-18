@@ -1,6 +1,5 @@
-import Link from 'next/link'
 import { PlaygroundIntro } from '@/components/shell/PlaygroundIntro'
-import { Icon } from '@/components/ui/Icon'
+import { Button } from '@/components/ui/Button'
 import { Label } from '@/components/ui/Label'
 import { StencilRule } from '@/components/ui/StencilRule'
 import { projectRepository } from '@/domain/project'
@@ -68,12 +67,9 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <Link href="/projects" className="stencil-focus group inline-flex items-center gap-4 py-1">
-            <Label tone="primary" className="stencil-underline pb-2">
-              Browse all projects
-            </Label>
-            <Icon name="arrow-right" nudge="forward" className="text-(--color-text-primary)" />
-          </Link>
+          <Button href="/projects" icon="arrow-right">
+            Browse all projects
+          </Button>
         </div>
 
         <ProjectIndexStrip projects={projects} />

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Logo } from '@/components/brand/Logo'
-import { Label } from '@/components/ui/Label'
+import { Button } from '@/components/ui/Button'
 import { InfoOverlay } from './InfoOverlay'
 
 /**
@@ -35,12 +35,9 @@ export function SiteHeader() {
           <ul className="flex items-center gap-10">
             {SECTIONS.map((section) => (
               <li key={section.href}>
-                <Link
-                  href={section.href}
-                  className="stencil-focus block py-1 text-(--color-text-secondary) transition-colors duration-(--duration-fast) hover:text-(--color-text-primary)"
-                >
-                  <Label>{section.label}</Label>
-                </Link>
+                <Button variant="ghost" tone="secondary" href={section.href}>
+                  {section.label}
+                </Button>
               </li>
             ))}
           </ul>
@@ -48,12 +45,9 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-6">
           {/* Below md the centred nav is hidden, so Index needs a home here. */}
-          <Link
-            href="/projects"
-            className="stencil-focus block py-1 text-(--color-text-secondary) transition-colors duration-(--duration-fast) hover:text-(--color-text-primary) md:hidden"
-          >
-            <Label>Index</Label>
-          </Link>
+          <Button variant="ghost" tone="secondary" href="/projects" className="md:hidden">
+            Index
+          </Button>
           <InfoOverlay />
         </div>
       </div>

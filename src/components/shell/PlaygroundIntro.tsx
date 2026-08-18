@@ -1,5 +1,4 @@
-import Link from 'next/link'
-import { Icon } from '@/components/ui/Icon'
+import { Button } from '@/components/ui/Button'
 import { Label } from '@/components/ui/Label'
 
 /**
@@ -29,15 +28,9 @@ export function PlaygroundIntro({ galleryHref = '#gallery' }: { galleryHref?: st
         Interactive works exploring sound, form and digital perception.
       </p>
 
-      <Link
-        href={galleryHref}
-        className="stencil-focus group mt-10 inline-flex items-center gap-4 py-2 text-(--color-text-primary)"
-      >
-        <Label tone="primary" className="stencil-underline pb-2">
-          Explore the gallery
-        </Label>
-        <Icon name="arrow-right" nudge="forward" />
-      </Link>
+      <Button href={galleryHref} icon="arrow-right" size="md" className="mt-10">
+        Explore the gallery
+      </Button>
     </div>
   )
 }

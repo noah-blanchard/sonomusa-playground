@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Button } from '@/components/ui/Button'
 import { Label } from '@/components/ui/Label'
 import { StencilRule } from '@/components/ui/StencilRule'
 
@@ -25,17 +25,16 @@ export default function NotFound() {
 
         <StencilRule className="my-10" variant="late" />
 
-        <div className="flex flex-wrap gap-x-10 gap-y-4">
-          <Link href="/" className="stencil-focus">
-            <Label tone="primary" className="stencil-underline pb-2">
-              Playground
-            </Label>
-          </Link>
-          <Link href="/projects" className="stencil-focus">
-            <Label tone="primary" className="stencil-underline pb-2">
-              All projects
-            </Label>
-          </Link>
+        {/* The only place in the shell that boxes its actions. Nothing else on
+            this page is a target, so the two ways out have to look like ones —
+            and the frame doing it is the stencil's, corners open. */}
+        <div className="flex flex-wrap gap-4">
+          <Button variant="solid" href="/" icon="arrow-right">
+            Playground
+          </Button>
+          <Button variant="outline" tone="secondary" href="/projects" icon="arrow-right">
+            All projects
+          </Button>
         </div>
       </div>
     </div>

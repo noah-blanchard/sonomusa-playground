@@ -1,4 +1,4 @@
-import { Icon } from '@/components/ui/Icon'
+import { Button } from '@/components/ui/Button'
 import { Label } from '@/components/ui/Label'
 
 /**
@@ -29,21 +29,12 @@ export function SiteFooter() {
       <ul className="flex items-center gap-6">
         {LINKS.map((link) => (
           <li key={link.href}>
-            <a
-              href={link.href}
-              {...(link.external && { target: '_blank', rel: 'noreferrer noopener' })}
-              className="stencil-focus group inline-flex items-center gap-2 py-1 text-(--color-text-secondary) transition-colors duration-(--duration-fast) hover:text-(--color-text-primary)"
-            >
-              <Label>{link.label}</Label>
-              {/* Every other external link in the shell says so both visually
-                  and to a screen reader. This one used to say neither. */}
-              {link.external && (
-                <>
-                  <Icon name="arrow-up-right" nudge="forward" />
-                  <span className="sr-only">(opens in a new tab)</span>
-                </>
-              )}
-            </a>
+            {/* `external` is the whole treatment at once — new tab, the ↗
+                marker and the screen-reader warning. This link used to have
+                the first and neither of the others. */}
+            <Button variant="ghost" tone="secondary" href={link.href} external={link.external}>
+              {link.label}
+            </Button>
           </li>
         ))}
       </ul>

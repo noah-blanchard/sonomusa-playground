@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Icon } from '@/components/ui/Icon'
+import { Button } from '@/components/ui/Button'
 import { Label } from '@/components/ui/Label'
 import { StencilRule } from '@/components/ui/StencilRule'
 
@@ -54,21 +54,23 @@ export function InfoOverlay() {
 
   return (
     <>
-      <button
+      <Button
         ref={triggerRef}
-        type="button"
+        variant="ghost"
+        tone="secondary"
         onClick={open}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className="stencil-focus group flex items-center gap-2 py-1 transition-colors duration-(--duration-fast) hover:text-(--color-text-primary)"
+        /* The dot is the accent's entire job here: punctuation, not atmosphere. */
+        leading={
+          <span
+            aria-hidden
+            className="size-1 rounded-full bg-current transition-colors duration-(--duration-fast) group-hover:bg-(--color-accent)"
+          />
+        }
       >
-        {/* The dot is the accent's entire job here: punctuation, not atmosphere. */}
-        <span
-          aria-hidden
-          className="size-1 rounded-full bg-(--color-text-secondary) transition-colors duration-(--duration-fast) group-hover:bg-(--color-accent)"
-        />
-        <Label>Info</Label>
-      </button>
+        Info
+      </Button>
 
       <dialog
         ref={dialogRef}
@@ -85,14 +87,13 @@ export function InfoOverlay() {
             <h2 id="info-overlay-title" className="font-title text-lg tracking-(--tracking-wide) uppercase">
               SonoMusa Playground
             </h2>
-            <button
-              type="button"
+            <Button
+              variant="icon"
+              tone="secondary"
               onClick={close}
-              className="stencil-focus -m-2 p-2 text-(--color-text-secondary) transition-colors duration-(--duration-fast) hover:text-(--color-text-primary)"
-            >
-              <span className="sr-only">Close</span>
-              <Icon name="close" />
-            </button>
+              srLabel="Close"
+              icon="close"
+            />
           </div>
 
           <StencilRule className="my-6" />

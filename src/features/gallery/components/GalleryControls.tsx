@@ -1,7 +1,6 @@
 'use client'
 
-import { Icon } from '@/components/ui/Icon'
-import { Label } from '@/components/ui/Label'
+import { Button } from '@/components/ui/Button'
 
 /**
  * Previous / next and the position indicators.
@@ -70,34 +69,25 @@ function ArrowButton({
 }) {
   const isNext = direction === 'next'
 
+  /*
+   * The visible word is hidden below sm, so the accessible name comes from
+   * srLabel instead — it reads the same at every width rather than degrading
+   * to an unnamed arrow on mobile. Button hides the visible label from
+   * assistive tech in turn, so the name is never announced twice.
+   */
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="md"
+      tone="secondary"
       onClick={onClick}
-      /*
-       * The visible label is hidden below sm, so the accessible name comes from
-       * aria-label instead — that way it reads the same at every width rather
-       * than degrading to an unnamed arrow on mobile. Everything inside is
-       * hidden from assistive tech so the name is not announced twice.
-       */
-      aria-label={isNext ? 'Next project' : 'Previous project'}
-      className="stencil-focus group flex items-center gap-3 py-2 text-(--color-text-secondary) transition-colors duration-(--duration-fast) hover:text-(--color-text-primary)"
+      srLabel={isNext ? 'Next project' : 'Previous project'}
+      icon={isNext ? 'arrow-right' : 'arrow-left'}
+      iconPosition={isNext ? 'trailing' : 'leading'}
+      labelClassName="hidden sm:inline"
+      className="gap-3"
     >
-      {isNext && (
-        <Label aria-hidden className="hidden sm:inline">
-          Next
-        </Label>
-      )}
-      <Icon
-        name={isNext ? 'arrow-right' : 'arrow-left'}
-        nudge={isNext ? 'forward' : 'back'}
-        size="md"
-      />
-      {!isNext && (
-        <Label aria-hidden className="hidden sm:inline">
-          Previous
-        </Label>
-      )}
-    </button>
+      {isNext ? 'Next' : 'Previous'}
+    </Button>
   )
 }

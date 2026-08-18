@@ -37,6 +37,26 @@
   }
 
   /*
+   * Anything clickable says so.
+   *
+   * The UA stylesheet gives `<a href>` a pointer and `<button>` an arrow, so
+   * until this rule existed half the shell's controls read as inert on hover —
+   * the carousel arrows, the position dots, the INFO trigger and the dialog
+   * close. Set here rather than as a utility on each control, so a control
+   * added later inherits it instead of being one more thing to remember.
+   */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /*
    * Reduced motion is a supported mode, not a degraded one. Transitions
    * collapse to near-instant so state changes stay visible without travel.
    */

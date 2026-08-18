@@ -75,6 +75,18 @@
     background-repeat: no-repeat;
   }
 
+  /*
+   * The same frame at control scale.
+   *
+   * The default 1.25rem gap is measured for a card. On a button it is more than
+   * half the height, so the two vertical edges compute to zero length and the
+   * frame renders as a pair of floating dashes — the corners stop being open
+   * and start being absent.
+   */
+  .stencil-frame-tight {
+    --stencil-gap: 0.5rem;
+  }
+
   .stencil-frame-strong {
     background-image:
       linear-gradient(var(--color-line-strong), var(--color-line-strong)),
@@ -136,7 +148,14 @@
     transition: background-size var(--duration-base) var(--ease-standard);
   }
 
-  .stencil-underline:hover {
+  /*
+   * The second selector matters more than the first. These underlines sit
+   * inside links that also carry an arrow and padding, so hovering the arrow —
+   * or the gap between them — is hovering the control but was not hovering the
+   * text. The underline lights for the whole target, not just the word.
+   */
+  .stencil-underline:hover,
+  .group:hover .stencil-underline {
     background-size: 100% var(--hairline);
     background-image: linear-gradient(var(--color-accent), var(--color-accent));
   }

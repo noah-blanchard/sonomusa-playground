@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Icon } from '@/components/ui/Icon'
+import { Button } from '@/components/ui/Button'
 import { Label } from '@/components/ui/Label'
 import { ProjectNumber } from '@/components/ui/ProjectNumber'
 import { StencilRule } from '@/components/ui/StencilRule'
@@ -101,22 +101,9 @@ export default async function ProjectPage({ params }: Params) {
             <ul className="mt-10 space-y-3">
               {links.map((link) => (
                 <li key={link.href}>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="stencil-focus group inline-flex items-center gap-3 py-1"
-                  >
-                    <Label tone="primary" className="stencil-underline pb-2">
-                      {link.label}
-                    </Label>
-                    <Icon
-                      name="arrow-up-right"
-                      nudge="forward"
-                      className="text-(--color-text-primary)"
-                    />
-                    <span className="sr-only">(opens in a new tab)</span>
-                  </a>
+                  <Button href={link.href} external className="gap-3">
+                    {link.label}
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -205,10 +192,16 @@ export default async function ProjectPage({ params }: Params) {
       )}
 
       <nav className="mt-24" aria-label="Back">
-        <Link href="/projects" className="stencil-focus group inline-flex items-center gap-4 py-1">
-          <Icon name="arrow-left" nudge="back" className="text-(--color-text-secondary)" />
-          <Label>All projects</Label>
-        </Link>
+        <Button
+          variant="ghost"
+          tone="secondary"
+          href="/projects"
+          icon="arrow-left"
+          iconPosition="leading"
+          className="gap-4"
+        >
+          All projects
+        </Button>
       </nav>
     </article>
   )

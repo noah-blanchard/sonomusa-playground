@@ -8,6 +8,13 @@ import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react'
  * a component rather than a utility class so the tracking and size stay in one
  * place across the whole shell (docs/rules/03-design-system.md).
  */
+
+const TONES = {
+  primary: 'text-(--color-text-primary)',
+  secondary: 'text-(--color-text-secondary)',
+  inherit: '',
+} as const
+
 export function Label({
   as: Tag = 'span',
   children,
@@ -18,9 +25,14 @@ export function Label({
   as?: ElementType
   children: ReactNode
   className?: string
-  tone?: 'primary' | 'secondary'
+  /**
+   * `inherit` sets no colour at all, so the label takes the colour of whatever
+   * contains it. Button needs this: it owns the colour for the whole control,
+   * including the icon, and a label that hard-codes its own would fight it.
+   */
+  tone?: 'primary' | 'secondary' | 'inherit'
 } & Omit<ComponentPropsWithoutRef<'span'>, 'children' | 'className'>) {
-  const color = tone === 'primary' ? 'text-(--color-text-primary)' : 'text-(--color-text-secondary)'
+  const color = TONES[tone]
 
   return (
     <Tag

@@ -1,7 +1,6 @@
-import Link from 'next/link'
 import type { Project } from '@/domain/project'
 import { ProjectPreview } from '@/features/project-preview'
-import { Icon } from '@/components/ui/Icon'
+import { Button } from '@/components/ui/Button'
 import { Label } from '@/components/ui/Label'
 import { ProjectNumber } from '@/components/ui/ProjectNumber'
 import { StencilRule } from '@/components/ui/StencilRule'
@@ -104,29 +103,18 @@ export function ProjectFrame({
               ))}
             </div>
 
-            <Link
+            {/* The project title is inside the accessible name, so the link
+                resolves to "View <title>" rather than a bare "View project"
+                repeated down the page. Button appends the new-tab warning
+                itself when the destination is external. */}
+            <Button
               href={href}
-              {...(live && { target: '_blank', rel: 'noreferrer noopener' })}
-              className="stencil-focus group inline-flex items-center gap-4 py-1"
+              external={Boolean(live)}
+              icon={live ? 'arrow-up-right' : 'arrow-right'}
+              srLabel={`View ${project.title}`}
             >
-              {/* The project title is inside the accessible name, so the link
-                  resolves to "View <title>" rather than a bare "View project"
-                  repeated down the page. */}
-              <span className="sr-only">
-                View {project.title}
-                {live ? ' (opens in a new tab)' : ''}
-              </span>
-
-              <Label aria-hidden tone="primary" className="stencil-underline pb-2">
-                View project
-              </Label>
-
-              <Icon
-                name={live ? 'arrow-up-right' : 'arrow-right'}
-                nudge="forward"
-                className="text-(--color-text-primary)"
-              />
-            </Link>
+              View project
+            </Button>
           </div>
         </div>
 

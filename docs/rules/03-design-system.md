@@ -94,6 +94,28 @@ Consistency should come from **rhythm**, not from effects. If two components ani
 
 Cards are neutral exhibition frames. The shell controls the number, title, status, tags, preview viewport, navigation affordance, proportions and metadata hierarchy. Inside the frame, the project may be colourful, monochrome, photographic, 3D, game-like, text-heavy, minimal, noisy, cinematic or UI-based — and the frame must make all of those look intentional side by side.
 
+## Controls
+
+Every deliberate action goes through `src/components/ui/Button.tsx`. It renders whichever element the props imply — `<button>` with no `href`, `next/link` for an internal one, `<a target="_blank">` for an external one — because in this system a control's appearance does not depend on whether it navigates or acts.
+
+Five variants, and the list is meant to stay this short:
+
+| Variant | For |
+| --- | --- |
+| `link` | The editorial default — a tracked label on a retracting stencil underline |
+| `ghost` | Navigation and secondary controls; colour carries the state, no underline |
+| `outline` | A control that must read as a target. Uses the stencil frame, corners open |
+| `solid` | The loudest thing available, and still only bone on obsidian. Use sparingly |
+| `icon` | Icon alone. Requires `srLabel` — there is no visible text to name it |
+
+Two sizes (`sm`, `md`) and two tones (`primary`, `secondary`), for the same reason motion has three durations: a component that invents its own padding is the bug.
+
+**`external` is one decision, not three.** It sets `target="_blank"`, the `↗` marker and the screen-reader warning together. They were separate once, and the footer's GitHub link shipped with the first and neither of the others.
+
+**`srLabel` replaces the accessible name** and hides the visible label from assistive tech. Reach for it when the visible text is too terse to stand alone — six "View project" links on one page should each announce their own project.
+
+**Anything clickable shows a pointer.** `globals.css` sets it for `button`, `[role="button"]` and `summary`, since the UA stylesheet gives only `<a href>` one; `e2e/affordance.spec.ts` sweeps every route and fails if a control does not. Do not hand-apply `cursor-pointer` — if something needs it and does not have it, the element is probably wrong.
+
 ## Iconography
 
 The set is **Phosphor at `light`**. That weight is the point: it is the only major icon family that ships a stroke thin enough to sit beside a `.stencil-rule` without out-weighing it. `regular` is heavier than anything else in the interface and is not used.
