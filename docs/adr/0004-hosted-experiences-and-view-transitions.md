@@ -46,14 +46,18 @@ No layout restructuring was needed: `SiteHeader` is already `position: fixed`, s
 
 ### 3. Native View Transitions, not a JavaScript overlay
 
-The morph is React's `<ViewTransition>` with one shared name, `gallery-stage`, on the fronting gallery frame and on the stage section. Two things fall out that an overlay could not have bought:
+The morph is React's `<ViewTransition>` with one shared name, `gallery-stage-<slug>`, on that project's gallery frame and on the stage section. Two things fall out that an overlay could not have bought:
 
 - The browser lifts the snapshot into its top layer, so it **escapes `.gallery-viewport`'s `overflow: hidden` and its edge mask** without either being touched. An overlay would have had to portal out and re-derive the card's geometry.
 - It is a **real navigation**. Reload, share, back and forward all behave, because nothing is being simulated in a single page.
 
-**The name is constant, not per-project.** Only one frame is ever active and only one stage is ever mounted, so one name is unique at capture time — and no project identifier reaches shared code (I3). It lives in `src/components/ui/ViewTransition.tsx` so both ends read it from one place.
+**The name is derived from the slug, not constant.** *(Revised 2026-08-18.)* It was originally one constant name moved onto whichever frame was active — only one frame fronts and only one stage mounts, so it looked unique at capture time. It is not: React registers a view-transition name on mount and releases it on unmount, never on a prop change, so the frame that gave the name up is still holding it when the next frame takes it. React reports the collision and refuses to animate, which is the exact opposite of what gating the name was for.
 
-**The name is toggled, the wrapper is not.** Every frame is wrapped unconditionally and only `name` changes with `isActive`. Wrapping conditionally would change the tree shape on every carousel move, remounting each frame and reloading each preview. And gating the name is mandatory: a duplicate `view-transition-name` aborts the whole transition, so six frames sharing one name would mean no morph at all.
+`stageViewTransitionName(slug)` in `src/components/ui/ViewTransition.tsx` gives every frame its own name, permanently. Names cannot collide, and `default="none"` keeps the frames with no counterpart on the stage out of the transition. It also fixes something the constant name got wrong on the way back: the pair is now the *same* project at both ends, so returning from the stage lands on the card the visitor actually left rather than on whichever card happens to be fronting.
+
+A derived name is not a project named in shared code (I3): the helper is handed a slug and knows nothing about which slugs exist, and `check:architecture` agrees.
+
+**The wrapper is unconditional.** Every frame is wrapped whether or not it fronts. Wrapping conditionally would change the tree shape on every carousel move, remounting each frame and reloading each preview.
 
 **The loading beat is the handoff, not a timer.** The poster fills the stage from the server render; a mark sits over it until the experience calls `onReady`, and then leaves on an exit animation. That dispatch goes through `startTransition`, because `<ViewTransition>` is activated by Transitions, Suspense and `useDeferredValue` and by nothing else — a plain `setState` would swap the mark without animating it.
 

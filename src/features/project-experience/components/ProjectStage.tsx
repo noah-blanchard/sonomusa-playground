@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import { Label } from '@/components/ui/Label'
 import { ProjectNumber } from '@/components/ui/ProjectNumber'
 import { StencilRule } from '@/components/ui/StencilRule'
-import { STAGE_VIEW_TRANSITION, ViewTransition } from '@/components/ui/ViewTransition'
+import { stageViewTransitionName, ViewTransition } from '@/components/ui/ViewTransition'
 import type { Project } from '@/domain/project'
 import { PreviewPoster } from '@/features/project-preview'
 import { ExperienceMount } from './ExperienceMount'
@@ -31,12 +31,14 @@ export function ProjectStage({ project, index }: { project: Project; index: numb
 
   return (
     /*
-     * The far end of the pair. The fronting gallery frame carries this same
-     * name, so the browser moves one object from card to full screen instead of
-     * cutting between two pages. Where view transitions are unsupported this
-     * renders as a plain section and the navigation is simply instant.
+     * The far end of the pair. This project's own gallery frame carries the
+     * same name, so the browser moves one object from card to full screen
+     * instead of cutting between two pages — and because the name is the
+     * project's, going back lands on the card the visitor actually left. Where
+     * view transitions are unsupported this renders as a plain section and the
+     * navigation is simply instant.
      */
-    <ViewTransition name={STAGE_VIEW_TRANSITION} share="morph" default="none">
+    <ViewTransition name={stageViewTransitionName(project.slug)} share="morph" default="none">
     <section
       aria-labelledby="stage-title"
       className="project-stage relative h-dvh w-full overflow-hidden bg-(--color-surface-well)"

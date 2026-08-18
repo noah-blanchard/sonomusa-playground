@@ -150,3 +150,44 @@ test('reduced motion holds the field still rather than removing it', async ({ br
   expect(lit).toBeGreaterThan(0)
   await context.close()
 })
+
+test('the field survives the motion preference changing under it', async ({ page }) => {
+  // The effect keys on the motion preference, so a change re-runs it against
+  // the canvas it already used. Releasing the GL context on the way out looked
+  // tidy and was not: a context belongs to its canvas element and `getContext`
+  // hands the same one back, so the second run inherited a dead context, linked
+  // nothing, and threw on its first frame — with the field gone for the rest of
+  // the visit. Fast Refresh and React's development double-effect take the same
+  // path, which is where this was found.
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  await page.waitForTimeout(500)
+
+  const failures: string[] = []
+  page.on('pageerror', (error) => failures.push(error.message))
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.waitForTimeout(400)
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.waitForTimeout(600)
+
+  expect(failures).toEqual([])
+
+  const lit = await page.evaluate(() => {
+    const node = document.querySelector<HTMLCanvasElement>('.gallery-viewport canvas')
+    const gl = node?.getContext('webgl2') ?? node?.getContext('webgl')
+    if (!node || !gl) return -1
+    if (gl.isContextLost()) return -2
+
+    const pixels = new Uint8Array(node.width * node.height * 4)
+    gl.readPixels(0, 0, node.width, node.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
+
+    let count = 0
+    for (let i = 3; i < pixels.length; i += 4) if (pixels[i]! > 0) count += 1
+    return count
+  })
+
+  // -2 is the regression itself: a canvas still mounted over a context that was
+  // taken away from it.
+  expect(lit).toBeGreaterThan(0)
+})

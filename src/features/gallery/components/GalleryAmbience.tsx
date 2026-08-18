@@ -24,6 +24,23 @@ import { accentToRgb, fieldEllipse, seededRandom, spawnParticles } from '../lib/
  */
 
 const VERTEX = /* glsl */ `
+  /*
+   * The two knobs for how the field answers the cursor, kept together and named
+   * so neither has to be found inside the expression that uses them.
+   *
+   * PUSH_STRENGTH is how far a mote is shoved, in viewport widths at the very
+   * centre of the influence. 0.009 was the original and read as barely there;
+   * past roughly 0.02 the field stops being stirred and starts being shoved,
+   * which is the wrong register for something meant to sit behind the work.
+   *
+   * PUSH_RADIUS is how wide that influence reaches, as a fraction of the
+   * viewport. Widening it makes the response feel softer and slower even at the
+   * same strength, because more of the field moves a little rather than a few
+   * motes moving a lot.
+   */
+  const float PUSH_STRENGTH = 0.013;
+  const float PUSH_RADIUS = 0.34;
+
   attribute vec2 position;
   attribute vec4 motion;   // phase, speed, amplitude, size
   attribute float alpha;
@@ -68,10 +85,9 @@ const VERTEX = /* glsl */ `
     vec2 toPointer = pos - uPointer;
     toPointer.x *= uAspect;
     float distance = length(toPointer);
-    float radius = 0.34;
-    float push = max(0.0, 1.0 - distance / radius);
+    float push = max(0.0, 1.0 - distance / PUSH_RADIUS);
     pos += normalize(toPointer + 1e-6)
-         * push * push * 0.009 * uPointerStrength * (0.35 + reach * 1.3);
+         * push * push * PUSH_STRENGTH * uPointerStrength * (0.35 + reach * 1.3);
 
     vAlpha = alpha;
 
@@ -222,6 +238,14 @@ export function GalleryAmbience({
     const build = () => {
       const { width, height } = parent.getBoundingClientRect()
       if (width <= 0 || height <= 0) return
+      /*
+       * A lost context accepts every call and links nothing, which leaves a
+       * Program with no uniform locations and turns the first render into a
+       * TypeError. Leaving `mesh` undefined instead means the loop simply has
+       * nothing to draw, which is the same complete recovery as no WebGL at
+       * all — and `webglcontextrestored` rebuilds when the GPU comes back.
+       */
+      if (gl.isContextLost()) return
 
       renderer.setSize(width, height)
 
@@ -356,6 +380,26 @@ export function GalleryAmbience({
     })
     observer.observe(parent)
 
+    /*
+     * A GPU reset takes the context away mid-session. Preventing the default is
+     * what asks the browser to try giving it back — without it there is no
+     * restore to listen for, and the field would be gone for the rest of the
+     * visit with no way back short of a reload.
+     */
+    const onContextLost = (event: Event) => {
+      event.preventDefault()
+      cancelAnimationFrame(frame)
+      mesh = undefined
+    }
+
+    const onContextRestored = () => {
+      build()
+      if (!stopped) frame = requestAnimationFrame(draw)
+    }
+
+    canvas.addEventListener('webglcontextlost', onContextLost)
+    canvas.addEventListener('webglcontextrestored', onContextRestored)
+
     return () => {
       stopped = true
       cancelAnimationFrame(frame)
@@ -363,10 +407,22 @@ export function GalleryAmbience({
       document.removeEventListener('visibilitychange', onVisibility)
       parent.removeEventListener('pointermove', onPointerMove)
       parent.removeEventListener('pointerleave', onPointerLeave)
-      // Release the context rather than waiting for the GC: browsers cap how
-      // many live WebGL contexts a page may hold, and this one is remounted
-      // whenever reduced motion changes.
-      gl.getExtension('WEBGL_lose_context')?.loseContext()
+      canvas.removeEventListener('webglcontextlost', onContextLost)
+      canvas.removeEventListener('webglcontextrestored', onContextRestored)
+      /*
+       * Release the context rather than waiting for the GC: browsers cap how
+       * many live WebGL contexts a page may hold.
+       *
+       * Only once the canvas is really gone, though. A context belongs to its
+       * canvas element and `getContext` hands the same one back for the life of
+       * that element — so losing it while the element survives (a reduced-motion
+       * change, or the double effect React runs in development) hands the next
+       * run a context that can no longer link a shader. Deferred by a task
+       * because the cleanup runs before React has finished removing the node.
+       */
+      setTimeout(() => {
+        if (!canvas.isConnected) gl.getExtension('WEBGL_lose_context')?.loseContext()
+      }, 0)
     }
   }, [reducedMotion, isDesktop])
 
