@@ -27,9 +27,7 @@ export interface ComponentPreviewProps {
 
 export type ComponentPreviewModule = ComponentType<ComponentPreviewProps>
 
-export const componentPreviewRegistry: Record<string, ComponentPreviewModule> = {
-  'musai-preview': lazy(() => import('@/content/projects/musai/preview')),
-}
+export const componentPreviewRegistry: Record<string, ComponentPreviewModule> = {}
 
 export function resolveComponentPreview(componentId: string): ComponentPreviewModule | null {
   // `hasOwn` for the same reason its sibling in project-experience/registry

@@ -40,7 +40,7 @@ export interface ProjectExperienceProps {
 export type ProjectExperienceModule = ComponentType<ProjectExperienceProps>
 
 export const projectExperienceRegistry: Record<string, ProjectExperienceModule> = {
-  'musai-experience': lazy(() => import('@/content/projects/musai/experience')),
+  'musicphone-experience': lazy(() => import('@/content/projects/musicphone/experience')),
   'zoomquilt-experience': lazy(() => import('@/content/projects/zoomquilt/experience')),
 }
 
