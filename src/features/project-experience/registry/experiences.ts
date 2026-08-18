@@ -41,6 +41,7 @@ export type ProjectExperienceModule = ComponentType<ProjectExperienceProps>
 
 export const projectExperienceRegistry: Record<string, ProjectExperienceModule> = {
   'musai-experience': lazy(() => import('@/content/projects/musai/experience')),
+  'zoomquilt-experience': lazy(() => import('@/content/projects/zoomquilt/experience')),
 }
 
 export function resolveProjectExperience(componentId: string): ProjectExperienceModule | null {

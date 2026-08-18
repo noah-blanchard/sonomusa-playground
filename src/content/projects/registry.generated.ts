@@ -7,6 +7,7 @@ import { project as liminalDrift } from './liminal-drift/project'
 import { project as morphwave } from './morphwave/project'
 import { project as musai } from './musai/project'
 import { project as orbitalData } from './orbital-data/project'
+import { project as zoomquilt } from './zoomquilt/project'
 
 /**
  * Raw manifests, in directory order. The repository validates them — this file
@@ -20,4 +21,5 @@ export const projectManifests: readonly unknown[] = [
   morphwave,
   musai,
   orbitalData,
+  zoomquilt,
 ]
