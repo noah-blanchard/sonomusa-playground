@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { Geometry, Mesh, Program, Renderer } from 'ogl'
-import { accentToRgb, frameBox, spawnParticles } from '../lib/ambience'
+import { accentToRgb, fieldEllipse, seededRandom, spawnParticles } from '../lib/ambience'
 
 /**
  * The ambient field that marks the fronting project.
@@ -15,9 +15,9 @@ import { accentToRgb, frameBox, spawnParticles } from '../lib/ambience'
  * original "gap, not a glow" constraint at product direction.
  *
  * It sits *behind* every frame. The active card is opaque and painted at
- * z-index 30, so it occludes the middle of the field and what remains is a band
- * around it. That is why there is no keep-out geometry here and no mask: the
- * card is the mask.
+ * z-index 30, so it occludes the middle of the field and what remains is a wide
+ * shallow ellipse around it. That is why there is no keep-out geometry here and
+ * no mask: the card is the mask.
  *
  * The colour is the active project's own accent. The shell stays colourless;
  * this is one of the two places a project's identity reaches the frame.
@@ -27,6 +27,7 @@ const VERTEX = /* glsl */ `
   attribute vec2 position;
   attribute vec4 motion;   // phase, speed, amplitude, size
   attribute float alpha;
+  attribute float reach;   // 0 against the card, 1 at the field's outer edge
 
   uniform float uTime;
   uniform vec2 uPointer;    // normalized viewport space; off-screen when idle
@@ -59,13 +60,18 @@ const VERTEX = /* glsl */ `
      * fast mouse move. Aspect-corrected so the falloff is a circle on screen
      * rather than an ellipse, and quadratic so a particle eases out of the way
      * instead of jumping.
+     *
+     * Weighted by reach: motes packed against the card barely move while the
+     * loose outer cloud swings. Without that the field dents as one rigid
+     * sheet; with it, the cursor stirs something diffuse.
      */
     vec2 toPointer = pos - uPointer;
     toPointer.x *= uAspect;
     float distance = length(toPointer);
-    float radius = 0.22;
+    float radius = 0.34;
     float push = max(0.0, 1.0 - distance / radius);
-    pos += normalize(toPointer + 1e-6) * push * push * 0.012 * uPointerStrength;
+    pos += normalize(toPointer + 1e-6)
+         * push * push * 0.009 * uPointerStrength * (0.35 + reach * 1.3);
 
     vAlpha = alpha;
 
@@ -99,9 +105,22 @@ const FRAGMENT = /* glsl */ `
   }
 `
 
-const PARTICLE_COUNT = 2000
+/**
+ * The field covers roughly three times the area a band around the frame did, so
+ * the count rises with it — at 2000 the ellipse reads as sparse rather than
+ * diffuse. The cost is still one draw call and nothing per frame on the CPU;
+ * the only real term is point-sprite fill rate, negligible at this size.
+ */
+const PARTICLE_COUNT = 3400
 /** Matches `--gallery-bleed`. CSS owns the value; this converts it to pixels. */
 const BLEED_REM = 3.25
+
+/**
+ * Any constant would do. What matters is that it is a constant: `build()` runs
+ * again on every resize, and dealing a fresh field each time made a window drag
+ * churn the whole layer. A rebuild is a new box, not a new field.
+ */
+const FIELD_SEED = 0x5f3a91
 
 /**
  * The same 768px the gallery already reinterprets itself at.
@@ -207,12 +226,15 @@ export function GalleryAmbience({
       renderer.setSize(width, height)
 
       const bleedPx = BLEED_REM * parseFloat(getComputedStyle(document.documentElement).fontSize)
-      const box = frameBox(Math.min(0.45, bleedPx / height))
-      const particles = spawnParticles(PARTICLE_COUNT, box, Math.random)
+      const ellipse = fieldEllipse(Math.min(0.45, bleedPx / height))
+      // Re-seeded, not carried over: the same draw for the same seed, so a
+      // resize reflows this field rather than dealing another one.
+      const particles = spawnParticles(PARTICLE_COUNT, ellipse, seededRandom(FIELD_SEED))
 
       const position = new Float32Array(PARTICLE_COUNT * 2)
       const motion = new Float32Array(PARTICLE_COUNT * 4)
       const alpha = new Float32Array(PARTICLE_COUNT)
+      const reach = new Float32Array(PARTICLE_COUNT)
 
       particles.forEach((particle, index) => {
         position[index * 2] = particle.x
@@ -222,12 +244,14 @@ export function GalleryAmbience({
         motion[index * 4 + 2] = particle.amplitude
         motion[index * 4 + 3] = particle.size
         alpha[index] = particle.alpha
+        reach[index] = particle.reach
       })
 
       const geometry = new Geometry(gl, {
         position: { size: 2, data: position },
         motion: { size: 4, data: motion },
         alpha: { size: 1, data: alpha },
+        reach: { size: 1, data: reach },
       })
 
       const program = new Program(gl, {
@@ -277,7 +301,7 @@ export function GalleryAmbience({
 
       // Ease the pointer toward the cursor. A small factor keeps the trailing
       // motion languid rather than jerky — the field glides after the mouse.
-      const ease = 0.035
+      const ease = 0.03
       pointer.x += (pointerTarget.x - pointer.x) * ease
       pointer.y += (pointerTarget.y - pointer.y) * ease
       pointer.strength += (pointerTarget.strength - pointer.strength) * ease

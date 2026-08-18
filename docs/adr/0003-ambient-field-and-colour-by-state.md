@@ -40,6 +40,24 @@ The three load-bearing constraints above are **relaxed** at product direction. T
 
 This supersedes the "gap, not a glow" reading for this one layer only. The surrounding intent stands: the field is still the single GPU layer in the shell, still coloured by the fronting project's `presentation.accent`, still scoped so it cannot drift into a full-screen fog or a second effect. `docs/rules/03` § "The ambient field" was rewritten the same day to grant this permission explicitly and to keep it scoped. If the glow ever spreads to a second layer or reads as brand furniture, that is the regression to revert — not this amendment.
 
+## Amendment — 2026-08-18: a wide shallow ellipse, not a band
+
+The amendment above rewrote `docs/rules/03` § "The ambient field" to ask for *"a stretched field, not a halo — motes spread wide across the page in a shallow ellipse around the active card."* The code did not follow: it still spawned on the **rectangular perimeter** of the frame's box and pushed outward along axis-aligned normals, which produced a tight band hugging the card and densest at its corners. This closes that gap; the rule needed no change.
+
+`frameBox` and `perimeterPoint` are replaced by `fieldEllipse` and `reachFromCard`. Four things are worth recording because none of them is obvious from the code.
+
+**A ring does not work here, and the reason is worth writing down.** The first attempt kept the old shell idea and merely bent it into an ellipse: motes born on a curve through the midpoints of the card's edges, pushed outward. It produced a clump above and below the card and nothing at the sides. The geometry is the problem — a curve through the card's *top edge midpoint* dips behind the card the instant it moves sideways, and the card is opaque. Any thin shell around a rectangle this large is almost entirely hidden. The field has to **fill** the area between the card and its outer edge, not trace a line around it.
+
+**The silhouette and the density are measured from different shapes, deliberately.** Points are drawn uniformly inside the **ellipse**, whose curve tapers the far left and right ends to nothing — without that taper a wide field reads as a band that stops rather than a field that thins. Density is then measured from the **card's rectangle**, because the card is a rectangle and it is the only occluder; measuring from anything else puts the brightest ring somewhere the card is not. Rejection sampling combines the two, roughly eight tries per mote, once, at spawn. The loop the CPU must not run is the per-frame one, and this is not it.
+
+**The two axes end differently, on purpose.** Horizontally the field runs past the stage edge and the mask in `gallery.css` (transparent outside 7%–93%) dissolves it. Vertically there is no mask, so the envelope is sized to land just inside the stage and the falloff ends the field itself — an overshoot there would be cut on a hard line. The whole anisotropy lives in `reachFromCard`, which normalizes each axis by its own reach.
+
+**The pointer now pushes each mote in proportion to its reach.** Motes packed against the card barely move; the loose outer cloud swings. A uniform push dented the field as one rigid sheet, which is legible as an effect rather than as something diffuse being stirred. This is the only reason `reach` is uploaded to the GPU as an attribute at all.
+
+The structural argument in §4 below is unchanged: the field still needs no measurement, since the ellipse derives from `FRAME_INSET` and the bleed alone; it still sits behind every frame with the opaque card as its only mask.
+
+One bug fell out of the rework. `build()` seeded the field from `Math.random`, so **every `ResizeObserver` fire dealt a new field** — a window drag churned the whole layer, and the unit test asserting seed stability was testing a property the component never used. The seed is now a constant, so a rebuild is a new box rather than a new field.
+
 ### 2. Saturation joins opacity as a hierarchy channel
 
 `docs/rules/03` § Forbidden bans *"forcing a shared visual treatment onto project media to make the set feel consistent."* Desaturation-by-state is the opposite of that: it does not make projects resemble each other, it makes them differ **by state**, and the one being looked at is fully itself. CONCEPT §20 already lists the channels as *"scale, position, opacity, framing, and typography"*; saturation belongs beside opacity, which the gallery already varies per frame.
@@ -62,7 +80,7 @@ The shell stays colourless. `--color-accent` remains aliased to bone, and *"the 
 
 Two structural choices did most of the work:
 
-**The field sits behind every frame, at `z-index: 0`.** The active card is opaque at `z-index: 30`, so it occludes the middle and what remains is a band around it. There is no keep-out geometry and no mask — the card *is* the mask.
+**The field sits behind every frame, at `z-index: 0`.** The active card is opaque at `z-index: 30`, so it occludes the middle and what remains is the ellipse around it. There is no keep-out geometry and no mask — the card *is* the mask.
 
 **Its geometry needs no measurement.** The active frame is always `left: 18%; right: 18%`, `scale: 1`, `x: 0`, so in canvas-normalized coordinates its box is a constant. `FRAME_INSET` is imported from `depth.ts` rather than restated; it is already duplicated into `gallery.css` under a "change both or neither" warning and a third copy would be the one that got missed.
 

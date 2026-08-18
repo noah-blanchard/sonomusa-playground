@@ -74,6 +74,45 @@ test('the ambient field mounts on desktop and paints something', async ({ page }
   expect(lit).toBeGreaterThan(0)
 })
 
+test('the field reaches the far sides of the stage, not just the card', async ({ page }) => {
+  // The shape is the point: a wide shallow ellipse, not a halo tracing the
+  // card. The card spans 18%–82%, so lit pixels in the outer bands are the only
+  // evidence that the field actually stretches — every structural check passes
+  // just as well on a tight band around the frame.
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  await page.waitForTimeout(500)
+
+  const bands = await page.evaluate(() => {
+    const node = document.querySelector<HTMLCanvasElement>('.gallery-viewport canvas')
+    const gl = node?.getContext('webgl2') ?? node?.getContext('webgl')
+    if (!node || !gl) return null
+
+    const pixels = new Uint8Array(node.width * node.height * 4)
+    gl.readPixels(0, 0, node.width, node.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
+
+    // The outer 15% either side — well clear of the card, and inside the point
+    // where the stage's mask starts dissolving the field.
+    const edge = Math.floor(node.width * 0.15)
+    let left = 0
+    let right = 0
+
+    for (let y = 0; y < node.height; y += 1) {
+      for (let x = 0; x < node.width; x += 1) {
+        if (pixels[(y * node.width + x) * 4 + 3]! === 0) continue
+        if (x < edge) left += 1
+        else if (x >= node.width - edge) right += 1
+      }
+    }
+
+    return { left, right }
+  })
+
+  expect(bands).not.toBeNull()
+  expect(bands!.left).toBeGreaterThan(0)
+  expect(bands!.right).toBeGreaterThan(0)
+})
+
 test('the field does not mount below the gallery breakpoint', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 })
   await page.goto('/')
