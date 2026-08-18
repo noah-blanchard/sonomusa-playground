@@ -1,9 +1,10 @@
 'use client'
 
 import { Children, useCallback, useMemo, useReducer, type CSSProperties, type ReactNode } from 'react'
+import { usePrefersReducedMotion } from '@/components/ui/usePrefersReducedMotion'
+
 import { PreviewActivationProvider } from '@/features/project-preview'
 import { useGalleryInput } from '../hooks/useGalleryInput'
-import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { depthStyle, mobileDepthStyle, signedOffset } from '../lib/depth'
 import { createGalleryState, galleryReducer } from '../lib/galleryReducer'
 import { GalleryAmbience } from './GalleryAmbience'
