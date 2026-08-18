@@ -1,0 +1,127 @@
+/*
+ * Motion across a navigation.
+ *
+ * The gallery frame and the stage it opens carry the same view-transition name,
+ * so the browser has an old snapshot and a new one for the same object and can
+ * move it. Everything here is about how that move looks.
+ *
+ * Two things this buys that no JavaScript overlay could:
+ *
+ *   - The snapshot is lifted into the browser's top layer, so it escapes
+ *     `.gallery-viewport`'s `overflow: hidden` and its edge mask without either
+ *     of them being touched.
+ *   - It is a real route change. Reload, share, back and forward all behave,
+ *     because nothing is being faked in a single page.
+ *
+ * Where the API is unsupported, none of this applies and the navigation is
+ * simply instant. That is the floor, and it is a perfectly good one.
+ *
+ * Every duration and easing is a token. The morph borrows the carousel's own
+ * values on purpose — the expand has to read as the same system as the travel
+ * between frames, not as a second opinion about how this interface moves
+ * (docs/rules/03-design-system.md).
+ */
+
+/* ── The morph: fronting frame → full-screen stage ───────────────────────── */
+
+::view-transition-group(.morph) {
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-standard);
+}
+
+/*
+ * A card's worth of text stretched to fill a screen interpolates badly. The
+ * blur is not decoration — it is what hides the artefact, and it is gone by the
+ * time either end is legible.
+ */
+::view-transition-image-pair(.morph) {
+  animation-name: stage-blur;
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-standard);
+}
+
+@keyframes stage-blur {
+  30% {
+    filter: blur(4px);
+  }
+}
+
+/* ── The handoff: loading mark → the running work ────────────────────────── */
+
+/*
+ * Asymmetric on purpose. The mark leaves quickly so it stops competing for
+ * attention; the work underneath it is already painted by then, so there is
+ * nothing to wait for.
+ */
+::view-transition-old(.stage-out) {
+  animation:
+    var(--duration-base) var(--ease-exit) both stage-fade reverse,
+    var(--duration-base) var(--ease-exit) both stage-lift;
+}
+
+@keyframes stage-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes stage-lift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-6px);
+  }
+}
+
+/* ── The header stays put ────────────────────────────────────────────────── */
+
+/*
+ * One fixed reference point, so what the visitor reads is "the work moved",
+ * not "the whole viewport moved". Hiding the old snapshot outright prevents the
+ * flash of two headers crossing.
+ */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: var(--z-nav);
+}
+
+::view-transition-old(site-header) {
+  display: none;
+}
+
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* ── Clicks are not swallowed ────────────────────────────────────────────── */
+
+/*
+ * The transition overlay sits above everything and would otherwise eat every
+ * click aimed at the live page underneath it for the duration.
+ */
+::view-transition {
+  pointer-events: none;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+
+/*
+ * The navigation still happens and the destination is still complete — it
+ * simply arrives without travelling. Reduced motion is a supported mode, not a
+ * degraded one (docs/rules/05-experience.md).
+ *
+ * The blanket rule in globals.css cannot reach these: view-transition
+ * pseudo-elements are not descendants of anything a `*` selector matches.
+ */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

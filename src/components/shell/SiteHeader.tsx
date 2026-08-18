@@ -21,7 +21,16 @@ const SECTIONS = [
 
 export function SiteHeader() {
   return (
-    <header className="fixed inset-x-0 top-0 z-(--z-nav) bg-linear-to-b from-(--color-obsidian) via-(--color-obsidian)/80 to-transparent">
+    <header
+      /*
+       * Named so the header can be held still while a route transition runs
+       * underneath it — a header that slides with the content removes the one
+       * fixed point the visitor has. The animation is suppressed in
+       * styles/transitions.css; naming it here is what gives that rule a target.
+       */
+      style={{ viewTransitionName: 'site-header' }}
+      className="fixed inset-x-0 top-0 z-(--z-nav) bg-linear-to-b from-(--color-obsidian) via-(--color-obsidian)/80 to-transparent"
+    >
       <div className="mx-auto flex max-w-(--layout-max) items-center justify-between px-(--layout-gutter-sm) py-5 sm:px-(--layout-gutter)">
         <Link
           href="/"
