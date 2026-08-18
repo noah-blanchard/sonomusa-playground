@@ -1,3 +1,4 @@
+import { Icon } from '@/components/ui/Icon'
 import { Label } from '@/components/ui/Label'
 
 /**
@@ -31,9 +32,17 @@ export function SiteFooter() {
             <a
               href={link.href}
               {...(link.external && { target: '_blank', rel: 'noreferrer noopener' })}
-              className="stencil-focus block py-1 text-(--color-text-secondary) transition-colors duration-(--duration-fast) hover:text-(--color-text-primary)"
+              className="stencil-focus group inline-flex items-center gap-2 py-1 text-(--color-text-secondary) transition-colors duration-(--duration-fast) hover:text-(--color-text-primary)"
             >
               <Label>{link.label}</Label>
+              {/* Every other external link in the shell says so both visually
+                  and to a screen reader. This one used to say neither. */}
+              {link.external && (
+                <>
+                  <Icon name="arrow-up-right" nudge="forward" />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </>
+              )}
             </a>
           </li>
         ))}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Icon } from '@/components/ui/Icon'
 import { Label } from '@/components/ui/Label'
 import { StencilRule } from '@/components/ui/StencilRule'
 
@@ -14,7 +15,8 @@ import { StencilRule } from '@/components/ui/StencilRule'
  */
 
 const SHORTCUTS: { keys: string; action: string }[] = [
-  { keys: '← →', action: 'Move between projects' },
+  // Named in words, like every other row. These are keys, not affordances.
+  { keys: 'Left / Right', action: 'Move between projects' },
   { keys: 'Home / End', action: 'First or last project' },
   { keys: 'Enter', action: 'Open the focused project' },
   { keys: 'Esc', action: 'Close this panel' },
@@ -89,9 +91,7 @@ export function InfoOverlay() {
               className="stencil-focus -m-2 p-2 text-(--color-text-secondary) transition-colors duration-(--duration-fast) hover:text-(--color-text-primary)"
             >
               <span className="sr-only">Close</span>
-              <span aria-hidden className="font-mono text-sm leading-none">
-                ✕
-              </span>
+              <Icon name="close" />
             </button>
           </div>
 

@@ -94,9 +94,26 @@ Consistency should come from **rhythm**, not from effects. If two components ani
 
 Cards are neutral exhibition frames. The shell controls the number, title, status, tags, preview viewport, navigation affordance, proportions and metadata hierarchy. Inside the frame, the project may be colourful, monochrome, photographic, 3D, game-like, text-heavy, minimal, noisy, cinematic or UI-based — and the frame must make all of those look intentional side by side.
 
+## Iconography
+
+The set is **Phosphor at `light`**. That weight is the point: it is the only major icon family that ships a stroke thin enough to sit beside a `.stencil-rule` without out-weighing it. `regular` is heavier than anything else in the interface and is not used.
+
+Every icon comes through `src/components/ui/Icon.tsx`. Never import from `@phosphor-icons/react` at a call site — the wrapper is what stops the hover nudge, the size and the accessibility contract drifting apart, which is exactly what happened to the six hand-written arrow spans it replaced.
+
+Three rules the wrapper enforces so you do not have to:
+
+- **Imports come from `@phosphor-icons/react/ssr`.** The package's root entry reads React context and cannot render in a Server Component; the `/ssr` build has no hooks and works in both trees. See `docs/adr/0002-icon-animation-and-webgl-libraries.md` §2.
+- **Icons are always `aria-hidden`.** The accessible name comes from adjacent `sr-only` text or the parent's `aria-label` — never from the icon. Phosphor sets no ARIA attributes of its own.
+- **Two sizes only**, `sm` and `md`, the same small-vocabulary rule the duration tokens follow. `md` is for the gallery's primary navigation controls; everything else is `sm`.
+
+**An icon is never the sole carrier of meaning.** Every one in the shell today sits beside a word. An icon-only control needs a real accessible name and a reason it could not be labelled.
+
+**The stencil marks are not icons.** `StencilRule`, the `//` divider, the accent dot and the eyebrow ticks are the identity, drawn with CSS gradients and hairline rules. Do not replace them with glyphs from an icon set — reach for the gap before reaching for a symbol.
+
 ## Forbidden
 
 - Fluid waves, particle fields, purple glow, generative noise or a signature shader as brand furniture. Those belong to individual projects; they do not define SonoMusa.
+- Icons imported directly from `@phosphor-icons/react` instead of through `src/components/ui/Icon.tsx`, or icons standing in for the stencil marks.
 - Full-bleed gradients or ambient colour fog.
 - Project-specific CSS anywhere in the shell.
 - Arbitrary one-off values where a token belongs.

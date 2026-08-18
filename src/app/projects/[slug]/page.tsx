@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { Icon } from '@/components/ui/Icon'
 import { Label } from '@/components/ui/Label'
 import { ProjectNumber } from '@/components/ui/ProjectNumber'
 import { StencilRule } from '@/components/ui/StencilRule'
@@ -109,12 +110,11 @@ export default async function ProjectPage({ params }: Params) {
                     <Label tone="primary" className="stencil-underline pb-2">
                       {link.label}
                     </Label>
-                    <span
-                      aria-hidden
-                      className="font-mono text-sm text-(--color-text-primary) transition-transform duration-(--duration-base) group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-                    >
-                      ↗
-                    </span>
+                    <Icon
+                      name="arrow-up-right"
+                      nudge="forward"
+                      className="text-(--color-text-primary)"
+                    />
                     <span className="sr-only">(opens in a new tab)</span>
                   </a>
                 </li>
@@ -206,12 +206,7 @@ export default async function ProjectPage({ params }: Params) {
 
       <nav className="mt-24" aria-label="Back">
         <Link href="/projects" className="stencil-focus group inline-flex items-center gap-4 py-1">
-          <span
-            aria-hidden
-            className="font-mono text-sm text-(--color-text-secondary) transition-transform duration-(--duration-base) group-hover:-translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-          >
-            ←
-          </span>
+          <Icon name="arrow-left" nudge="back" className="text-(--color-text-secondary)" />
           <Label>All projects</Label>
         </Link>
       </nav>

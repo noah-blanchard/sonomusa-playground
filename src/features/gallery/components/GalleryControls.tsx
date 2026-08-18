@@ -1,5 +1,6 @@
 'use client'
 
+import { Icon } from '@/components/ui/Icon'
 import { Label } from '@/components/ui/Label'
 
 /**
@@ -87,16 +88,11 @@ function ArrowButton({
           Next
         </Label>
       )}
-      <span
-        aria-hidden
-        className={`font-mono text-base transition-transform duration-(--duration-base) ease-(--ease-standard) motion-reduce:transition-none ${
-          isNext
-            ? 'group-hover:translate-x-1 motion-reduce:group-hover:translate-x-0'
-            : 'group-hover:-translate-x-1 motion-reduce:group-hover:translate-x-0'
-        }`}
-      >
-        {isNext ? '→' : '←'}
-      </span>
+      <Icon
+        name={isNext ? 'arrow-right' : 'arrow-left'}
+        nudge={isNext ? 'forward' : 'back'}
+        size="md"
+      />
       {!isNext && (
         <Label aria-hidden className="hidden sm:inline">
           Previous

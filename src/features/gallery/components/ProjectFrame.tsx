@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Project } from '@/domain/project'
 import { ProjectPreview } from '@/features/project-preview'
+import { Icon } from '@/components/ui/Icon'
 import { Label } from '@/components/ui/Label'
 import { ProjectNumber } from '@/components/ui/ProjectNumber'
 import { StencilRule } from '@/components/ui/StencilRule'
@@ -120,12 +121,11 @@ export function ProjectFrame({
                 View project
               </Label>
 
-              <span
-                aria-hidden
-                className="font-mono text-sm text-(--color-text-primary) transition-transform duration-(--duration-base) ease-(--ease-standard) group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-              >
-                {live ? '↗' : '→'}
-              </span>
+              <Icon
+                name={live ? 'arrow-up-right' : 'arrow-right'}
+                nudge="forward"
+                className="text-(--color-text-primary)"
+              />
             </Link>
           </div>
         </div>

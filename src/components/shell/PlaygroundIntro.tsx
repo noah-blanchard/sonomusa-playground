@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Icon } from '@/components/ui/Icon'
 import { Label } from '@/components/ui/Label'
 
 /**
@@ -35,12 +36,7 @@ export function PlaygroundIntro({ galleryHref = '#gallery' }: { galleryHref?: st
         <Label tone="primary" className="stencil-underline pb-2">
           Explore the gallery
         </Label>
-        <span
-          aria-hidden
-          className="translate-x-0 font-mono text-sm transition-transform duration-(--duration-base) ease-(--ease-standard) group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-        >
-          →
-        </span>
+        <Icon name="arrow-right" nudge="forward" />
       </Link>
     </div>
   )

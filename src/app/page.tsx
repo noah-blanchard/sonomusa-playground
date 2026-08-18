@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { PlaygroundIntro } from '@/components/shell/PlaygroundIntro'
+import { Icon } from '@/components/ui/Icon'
 import { Label } from '@/components/ui/Label'
 import { StencilRule } from '@/components/ui/StencilRule'
 import { projectRepository } from '@/domain/project'
@@ -71,12 +72,7 @@ export default async function HomePage() {
             <Label tone="primary" className="stencil-underline pb-2">
               Browse all projects
             </Label>
-            <span
-              aria-hidden
-              className="font-mono text-sm text-(--color-text-primary) transition-transform duration-(--duration-base) ease-(--ease-standard) group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-            >
-              →
-            </span>
+            <Icon name="arrow-right" nudge="forward" className="text-(--color-text-primary)" />
           </Link>
         </div>
 
