@@ -20,13 +20,14 @@ export const project = defineProject({
 
   media: {
     poster: 'poster.webp',
+    thumbnail: 'thumbnail.webp',
   },
 
   /*
-   * The live game is embeddable, so the frame shows the work itself rather
-   * than a still — the same URL the stage opens full screen.
+   * The frame shows the game's lobby at rest — the live piece is one click
+   * away on the stage, and the gallery carries six frames, not six apps.
    */
-  preview: { kind: 'iframe', src: 'https://musicphone.sonomusa.tech/' },
+  preview: { kind: 'static' },
 
   /* `Try it out` opens the game full screen on the stage this repo serves. */
   experience: { componentId: 'musicphone-experience' },

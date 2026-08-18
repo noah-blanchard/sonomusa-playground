@@ -20,6 +20,7 @@ export const project = defineProject({
 
   media: {
     poster: 'poster.webp',
+    thumbnail: 'thumbnail.webp',
   },
 
   /*
