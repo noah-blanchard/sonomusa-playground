@@ -222,6 +222,14 @@ export function GalleryAmbience({
     const build = () => {
       const { width, height } = parent.getBoundingClientRect()
       if (width <= 0 || height <= 0) return
+      /*
+       * A lost context accepts every call and links nothing, which leaves a
+       * Program with no uniform locations and turns the first render into a
+       * TypeError. Leaving `mesh` undefined instead means the loop simply has
+       * nothing to draw, which is the same complete recovery as no WebGL at
+       * all — and `webglcontextrestored` rebuilds when the GPU comes back.
+       */
+      if (gl.isContextLost()) return
 
       renderer.setSize(width, height)
 
@@ -356,6 +364,26 @@ export function GalleryAmbience({
     })
     observer.observe(parent)
 
+    /*
+     * A GPU reset takes the context away mid-session. Preventing the default is
+     * what asks the browser to try giving it back — without it there is no
+     * restore to listen for, and the field would be gone for the rest of the
+     * visit with no way back short of a reload.
+     */
+    const onContextLost = (event: Event) => {
+      event.preventDefault()
+      cancelAnimationFrame(frame)
+      mesh = undefined
+    }
+
+    const onContextRestored = () => {
+      build()
+      if (!stopped) frame = requestAnimationFrame(draw)
+    }
+
+    canvas.addEventListener('webglcontextlost', onContextLost)
+    canvas.addEventListener('webglcontextrestored', onContextRestored)
+
     return () => {
       stopped = true
       cancelAnimationFrame(frame)
@@ -363,10 +391,22 @@ export function GalleryAmbience({
       document.removeEventListener('visibilitychange', onVisibility)
       parent.removeEventListener('pointermove', onPointerMove)
       parent.removeEventListener('pointerleave', onPointerLeave)
-      // Release the context rather than waiting for the GC: browsers cap how
-      // many live WebGL contexts a page may hold, and this one is remounted
-      // whenever reduced motion changes.
-      gl.getExtension('WEBGL_lose_context')?.loseContext()
+      canvas.removeEventListener('webglcontextlost', onContextLost)
+      canvas.removeEventListener('webglcontextrestored', onContextRestored)
+      /*
+       * Release the context rather than waiting for the GC: browsers cap how
+       * many live WebGL contexts a page may hold.
+       *
+       * Only once the canvas is really gone, though. A context belongs to its
+       * canvas element and `getContext` hands the same one back for the life of
+       * that element — so losing it while the element survives (a reduced-motion
+       * change, or the double effect React runs in development) hands the next
+       * run a context that can no longer link a shader. Deferred by a task
+       * because the cleanup runs before React has finished removing the node.
+       */
+      setTimeout(() => {
+        if (!canvas.isConnected) gl.getExtension('WEBGL_lose_context')?.loseContext()
+      }, 0)
     }
   }, [reducedMotion, isDesktop])
 
