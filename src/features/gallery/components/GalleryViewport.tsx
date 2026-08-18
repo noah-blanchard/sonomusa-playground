@@ -1,14 +1,18 @@
 'use client'
 
-import { Children, useCallback, useMemo, useReducer, type CSSProperties, type ReactNode } from 'react'
+import { Children, useCallback, useMemo, useReducer, useRef, type CSSProperties, type ReactNode } from 'react'
 import { usePrefersReducedMotion } from '@/components/ui/usePrefersReducedMotion'
 import { stageViewTransitionName, ViewTransition } from '@/components/ui/ViewTransition'
 import { PreviewActivationProvider } from '@/features/project-preview'
+import { useAutoplay } from '../hooks/useAutoplay'
 import { useGalleryInput } from '../hooks/useGalleryInput'
 import { depthStyle, mobileDepthStyle, signedOffset } from '../lib/depth'
 import { createGalleryState, galleryReducer } from '../lib/galleryReducer'
 import { GalleryAmbience } from './GalleryAmbience'
 import { GalleryControls } from './GalleryControls'
+
+/** How long a frame fronts before the gallery moves on by itself. */
+const AUTOPLAY_INTERVAL_MS = 7000
 
 /**
  * The only hydrated part of the gallery.
@@ -38,11 +42,40 @@ export function GalleryViewport({
   )
   const prefersReducedMotion = usePrefersReducedMotion()
 
-  const onNext = useCallback(() => dispatch({ type: 'next' }), [])
-  const onPrevious = useCallback(() => dispatch({ type: 'previous' }), [])
-  const onFirst = useCallback(() => dispatch({ type: 'first' }), [])
-  const onLast = useCallback(() => dispatch({ type: 'last' }), [])
-  const onGoTo = useCallback((index: number) => dispatch({ type: 'goTo', index }), [])
+  /*
+   * The section element doubles as the autoplay region: hover or focus
+   * anywhere inside it pauses the timer, and every manual move fires
+   * `gallery:manual` on it so the countdown restarts rather than yanking the
+   * gallery away right after the visitor took the wheel.
+   */
+  const regionRef = useRef<HTMLElement>(null)
+  const notifyManual = useCallback(() => {
+    regionRef.current?.dispatchEvent(new CustomEvent('gallery:manual'))
+  }, [])
+
+  const onNext = useCallback(() => {
+    notifyManual()
+    dispatch({ type: 'next' })
+  }, [notifyManual])
+  const onPrevious = useCallback(() => {
+    notifyManual()
+    dispatch({ type: 'previous' })
+  }, [notifyManual])
+  const onFirst = useCallback(() => {
+    notifyManual()
+    dispatch({ type: 'first' })
+  }, [notifyManual])
+  const onLast = useCallback(() => {
+    notifyManual()
+    dispatch({ type: 'last' })
+  }, [notifyManual])
+  const onGoTo = useCallback(
+    (index: number) => {
+      notifyManual()
+      dispatch({ type: 'goTo', index })
+    },
+    [notifyManual],
+  )
 
   const { viewportRef, onKeyDown, onPointerDown, onPointerUp, onPointerCancel } = useGalleryInput({
     onNext,
@@ -50,6 +83,18 @@ export function GalleryViewport({
     onFirst,
     onLast,
     enabled: items.length > 1,
+  })
+
+  /*
+   * The gallery is a loop, so autoplay is just `next` on a timer. Reduced
+   * motion turns it off entirely — motion the visitor did not ask for is
+   * exactly what the preference exists to prevent.
+   */
+  useAutoplay({
+    onTick: useCallback(() => dispatch({ type: 'next' }), []),
+    intervalMs: AUTOPLAY_INTERVAL_MS,
+    enabled: items.length > 1 && !prefersReducedMotion,
+    regionRef,
   })
 
   // Children are opaque server-rendered nodes; toArray gives a stable list to
@@ -62,6 +107,7 @@ export function GalleryViewport({
 
   return (
     <section
+      ref={regionRef}
       aria-roledescription="carousel"
       aria-label="Projects"
       onKeyDown={onKeyDown}
