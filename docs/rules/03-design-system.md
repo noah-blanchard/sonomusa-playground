@@ -96,13 +96,13 @@ Cards are neutral exhibition frames. The shell controls the number, title, statu
 
 ## The ambient field
 
-The gallery's fronting project carries a drifting field of points, drawn on a single WebGL canvas behind the frames. It is **the one GPU layer in the shell**, and it is the motif in motion rather than an effect. Three constraints keep it that way, and they are not stylistic:
+The gallery's fronting project carries a drifting field of glowing motes, drawn on a single WebGL canvas behind the frames. It is **the one GPU layer in the shell**. This layer is permitted a glow that nothing else in the shell is:
 
-- **Hard 1px points.** No radial falloff in the fragment shader — a falloff is exactly what turns a hairline point into a glowing mote.
-- **No additive blending.** Overlaps never accumulate into brightness, so the field cannot bloom.
-- **Low alpha**, in the same register as `--color-line` and `.stencil-rule`.
+- **Soft motes.** Each point carries a radial falloff in the fragment shader, so it reads as a glow rather than a hard pixel.
+- **Additive blending.** Overlaps accumulate into brightness, so the field can bloom.
+- **A stretched field, not a halo.** Motes spread wide across the page in a shallow ellipse around the active card, densest and brightest against it, thinning toward the edges.
 
-Read this as permission for *this*, not for glow generally. Everything under Forbidden still stands. If a second GPU layer is ever proposed, it needs its own argument and its own ADR — see `docs/adr/0003`.
+This permission is scoped to this single layer and was granted by the 2026-08-17 amendment to `docs/adr/0003`. It is not permission for glow generally — everything under Forbidden still stands. If a second GPU layer is ever proposed, it needs its own argument and its own ADR.
 
 The colour is the fronting project's declared `presentation.accent`. The shell stays colourless: `--color-accent` is still bone, and project colour reaches the frame only through project media and this field.
 

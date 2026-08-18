@@ -41,21 +41,18 @@ export interface FieldParticle {
 }
 
 /**
- * How far, as a fraction of the frame's smaller dimension, a particle may be
- * born from the frame's edge. Small on purpose: the brief is restrained, and a
- * band this tight is what makes the field read as belonging to the card rather
- * than as weather over the whole gallery.
+ * How far, as a fraction of the frame's height, a behind-the-card mote may
+ * spawn from the frame's edge. Small on purpose: those are hidden behind the
+ * opaque card, so a tight band is all that is ever seen slipping out from
+ * under it.
  */
 const BAND = 0.2
 
 /**
- * Most particles sit close to the edge; the tail reaches further out.
- *
- * These two are tuned together and the test asserts the result rather than the
- * numbers: three quarters of the outward half must land within 0.05 of the
- * card. A wider band with a gentler falloff reads as weather over the whole
- * gallery instead of as something belonging to the fronting project — which is
- * what the first attempt did, at 0.55 and 2.6.
+ * Crowds the behind-the-card motes toward the frame's edge rather than letting
+ * them scatter across its whole face, so the ones that peek out do so near the
+ * border. The horizontal spread of the main field uses its own, weaker
+ * exponent — see `spawnParticles`.
  */
 const FALLOFF = 3.5
 

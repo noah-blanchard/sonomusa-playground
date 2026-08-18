@@ -32,6 +32,14 @@ The result is the pen that draws the rest of the shell, drifting. **No CONCEPT a
 
 The honest caveat: this is a judgement about where a line falls, not a proof. If it ever reads as an effect rather than as the motif, it is wrong and the constraints above are the first place to look.
 
+---
+
+## Amendment — 2026-08-17: the field becomes a glow
+
+The three load-bearing constraints above are **relaxed** at product direction. The field is no longer held to "hard 1px points, no falloff, no additive blending." It now renders each point as a soft mote (a radial falloff in the fragment shader) with additive blending, so overlaps accumulate into brightness and the band around the active card reads as a glow rather than a dusting.
+
+This supersedes the "gap, not a glow" reading for this one layer only. The surrounding intent stands: the field is still the single GPU layer in the shell, still coloured by the fronting project's `presentation.accent`, still scoped so it cannot drift into a full-screen fog or a second effect. `docs/rules/03` § "The ambient field" was rewritten the same day to grant this permission explicitly and to keep it scoped. If the glow ever spreads to a second layer or reads as brand furniture, that is the regression to revert — not this amendment.
+
 ### 2. Saturation joins opacity as a hierarchy channel
 
 `docs/rules/03` § Forbidden bans *"forcing a shared visual treatment onto project media to make the set feel consistent."* Desaturation-by-state is the opposite of that: it does not make projects resemble each other, it makes them differ **by state**, and the one being looked at is fully itself. CONCEPT §20 already lists the channels as *"scale, position, opacity, framing, and typography"*; saturation belongs beside opacity, which the gallery already varies per frame.
