@@ -44,6 +44,13 @@
    * gradient's 0–7% and 93–100% bands only ever touch a neighbour.
    */
   .gallery-viewport {
+    /*
+     * The height lives here rather than as a utility because it is no longer
+     * just the card's height — it is the card plus the clearance the ambient
+     * field needs on each side. Splitting those two facts across a class name
+     * and a stylesheet would make the frame's inset below look arbitrary.
+     */
+    height: calc(clamp(24rem, 58vh, 34rem) + var(--gallery-bleed) * 2);
     overflow: hidden;
 
     -webkit-mask-image: linear-gradient(
@@ -68,8 +75,8 @@
    */
   .gallery-frame {
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: var(--gallery-bleed);
+    bottom: var(--gallery-bleed);
     left: 18%;
     right: 18%;
     transform-origin: center;
@@ -120,10 +127,48 @@
   }
 
   /*
+   * Colour is the fronting project's alone.
+   *
+   * A second hierarchy channel alongside the opacity and scale above, and the
+   * same kind of thing: CONCEPT §20 expresses hierarchy through scale,
+   * position, opacity, framing and typography, and saturation belongs in that
+   * list. It is emphatically not the forbidden case of forcing one treatment
+   * onto project media to make the set cohere — it makes projects differ *by
+   * state*, and the one being looked at is fully itself.
+   *
+   * Keyed off `inert`, which the viewport already sets on every frame but the
+   * active one. No prop plumbing, and it cannot fall out of step with the real
+   * active index because it *is* the real active index.
+   *
+   * Scoped to `.gallery-frame` on purpose: the same `ProjectPreview` renders
+   * the hero on a project's own page, where it is unambiguously the subject and
+   * must never be dimmed.
+   */
+  .gallery-frame [data-project-media] {
+    filter: grayscale(1);
+    transition: filter var(--duration-slow) var(--ease-standard);
+  }
+
+  .gallery-frame:not([inert]) [data-project-media] {
+    filter: grayscale(0);
+  }
+
+  /*
    * Mobile is a reinterpretation, not a compression (CONCEPT §32): full-width
    * frames, one at a time, no scaling.
    */
   @media (max-width: 767px) {
+    /*
+     * No clearance here, because there is no field to clear space for. The
+     * frame is full width at this size, so there is no room beside it, and the
+     * depth composition the field annotates does not exist. Mobile is a
+     * reinterpretation, not a compression — an empty margin would just be the
+     * desktop layout with its content removed.
+     */
+    .gallery-viewport {
+      --gallery-bleed: 0px;
+    }
+
     .gallery-frame {
       left: 0;
       right: 0;

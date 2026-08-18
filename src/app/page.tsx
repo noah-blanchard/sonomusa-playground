@@ -18,7 +18,12 @@ export default async function HomePage() {
 
   // The viewport needs names for labels and announcements; it never sees the
   // projects themselves, which is what keeps it project-agnostic.
-  const items = projects.map((project) => ({ slug: project.slug, title: project.title }))
+  const items = projects.map((project) => ({
+    slug: project.slug,
+    title: project.title,
+    // The gallery's ambient field draws in whichever project is fronting.
+    accent: project.presentation?.accent,
+  }))
 
   return (
     <div className="mx-auto max-w-(--layout-max) px-(--layout-gutter-sm) sm:px-(--layout-gutter)">

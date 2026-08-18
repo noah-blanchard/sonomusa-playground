@@ -165,4 +165,34 @@
       transition: none;
     }
   }
+
+  /*
+   * Index imagery: grey until the card is hovered.
+   *
+   * The whole rule sits inside `(hover: hover)` rather than relying on a
+   * `:hover` that simply never fires. On a touch device there is no way to
+   * reveal the colour, so the grey must not be applied in the first place —
+   * `docs/rules/05-experience.md` is explicit that nothing may be reachable by
+   * hover alone. Phones get colour; pointers get the reveal.
+   *
+   * `.group` is the same marker `ProjectIndexCard` already uses for its scale
+   * transform, so both halves of the hover respond as one gesture.
+   */
+  @media (hover: hover) {
+    .media-reveal {
+      filter: grayscale(1);
+      transition: filter var(--duration-slow) var(--ease-standard);
+    }
+
+    .group:hover .media-reveal,
+    .group:focus-visible .media-reveal {
+      filter: grayscale(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .media-reveal {
+        transition: none;
+      }
+    }
+  }
 }

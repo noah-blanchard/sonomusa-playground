@@ -94,6 +94,17 @@
   --layout-gutter: 2rem;
   --layout-gutter-sm: 1.25rem;
 
+  /*
+   * Clearance around the gallery's active frame.
+   *
+   * The stage grows by this on each side and the frame is inset by the same,
+   * so the card lands exactly where it did — the space is added around it, not
+   * taken from it. It exists so the ambient field has somewhere to be: the
+   * viewport clips, and without this the frame touches the clip on all four
+   * sides and anything drawn near it is cut on a hard line.
+   */
+  --gallery-bleed: 3.25rem;
+
   /* ───────────────────────────────────────────────────────────────────────
    * Depth — the gallery composition only, kept here so the stacking order is
    * legible in one place rather than scattered as magic numbers.

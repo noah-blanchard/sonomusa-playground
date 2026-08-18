@@ -6,6 +6,7 @@ import { useGalleryInput } from '../hooks/useGalleryInput'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { depthStyle, mobileDepthStyle, signedOffset } from '../lib/depth'
 import { createGalleryState, galleryReducer } from '../lib/galleryReducer'
+import { GalleryAmbience } from './GalleryAmbience'
 import { GalleryControls } from './GalleryControls'
 
 /**
@@ -23,7 +24,12 @@ export function GalleryViewport({
   items,
   children,
 }: {
-  items: { slug: string; title: string }[]
+  /**
+   * Names for labels and announcements, plus each project's own colour for the
+   * ambient field. Still no project object — the viewport never sees one, which
+   * is what keeps it project-agnostic.
+   */
+  items: { slug: string; title: string; accent?: string }[]
   children: ReactNode
 }) {
   const [state, dispatch] = useReducer(galleryReducer, items.length, (count) =>
@@ -65,8 +71,12 @@ export function GalleryViewport({
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
-        className="gallery-viewport relative h-[clamp(24rem,58vh,34rem)] touch-pan-y select-none"
+        className="gallery-viewport relative touch-pan-y select-none"
       >
+        {/* Behind every frame, so the opaque active card occludes its middle
+            and what is left reads as a band around the fronting project. */}
+        <GalleryAmbience accent={active?.accent} reducedMotion={prefersReducedMotion} />
+
         <PreviewActivationProvider
           activeSlug={active?.slug ?? null}
           reducedMotion={prefersReducedMotion}

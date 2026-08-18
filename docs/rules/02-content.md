@@ -98,6 +98,23 @@ Your preview must: render nothing heavy until activated, unload when inactive, a
 - Optimize before committing. The repository is not an image pipeline.
 - Media is referenced by filename relative to the project directory, never by absolute path. That keeps remote assets possible later without touching manifests.
 
+## Declaring a colour
+
+`presentation.accent` is an optional six-digit hex — a project's own colour, in its own hands.
+
+```ts
+presentation: { accent: '#2FD3C0' },
+```
+
+One value, two uses. It draws the placeholder artwork, and it colours the ambient field the gallery puts around the project while it is fronting. Declaring it in two places would let them disagree, which is what invariant I2 exists to prevent.
+
+Absence is valid and means bone. It is not a licence to colour the shell: the accent never touches navigation, type or chrome, which stay bone on obsidian (CONCEPT §24).
+
+Two things worth knowing when the art is generated rather than real:
+
+- The generator **never overwrites** — a real poster that lands survives every run. Pass `--force` only when the generator itself has changed and its own output needs redrawing.
+- Next caches optimized images by URL, not by content. Replacing a poster in place leaves the old optimization being served; clear `.next/cache/images` after regenerating.
+
 ## What does not belong here
 
 A manifest is data. It must not import from `src/features/`, `src/app/`, `src/components/` or `src/styles/` — ESLint will stop you. If a project needs bespoke presentation, it goes behind a `componentId` or a custom route, never inline in the content layer.

@@ -43,7 +43,7 @@ export function ProjectIndexCard({
             alt=""
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-            className="object-cover transition-transform duration-(--duration-slow) ease-(--ease-standard) group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+            className="media-reveal object-cover transition-transform duration-(--duration-slow) ease-(--ease-standard) group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             // Decorative: the title below is the real accessible name.
             aria-hidden
           />

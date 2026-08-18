@@ -94,6 +94,29 @@ Consistency should come from **rhythm**, not from effects. If two components ani
 
 Cards are neutral exhibition frames. The shell controls the number, title, status, tags, preview viewport, navigation affordance, proportions and metadata hierarchy. Inside the frame, the project may be colourful, monochrome, photographic, 3D, game-like, text-heavy, minimal, noisy, cinematic or UI-based — and the frame must make all of those look intentional side by side.
 
+## The ambient field
+
+The gallery's fronting project carries a drifting field of points, drawn on a single WebGL canvas behind the frames. It is **the one GPU layer in the shell**, and it is the motif in motion rather than an effect. Three constraints keep it that way, and they are not stylistic:
+
+- **Hard 1px points.** No radial falloff in the fragment shader — a falloff is exactly what turns a hairline point into a glowing mote.
+- **No additive blending.** Overlaps never accumulate into brightness, so the field cannot bloom.
+- **Low alpha**, in the same register as `--color-line` and `.stencil-rule`.
+
+Read this as permission for *this*, not for glow generally. Everything under Forbidden still stands. If a second GPU layer is ever proposed, it needs its own argument and its own ADR — see `docs/adr/0003`.
+
+The colour is the fronting project's declared `presentation.accent`. The shell stays colourless: `--color-accent` is still bone, and project colour reaches the frame only through project media and this field.
+
+## Colour as a state channel
+
+Saturation sits beside opacity in the list CONCEPT §20 gives for hierarchy. In the gallery every frame but the fronting one is desaturated; in the index a card's image is grey until the card is hovered.
+
+This is not the Forbidden case of forcing one treatment onto project media to make the set cohere. It makes projects differ **by state** — the one being looked at is fully itself, and no two projects are made to resemble each other.
+
+Two rules that are easy to get wrong:
+
+- The gallery rule keys off `inert`, which the viewport already sets on every frame but the active one, and is scoped to `.gallery-frame`. A project's own page shows its hero in colour — it is unambiguously the subject there.
+- The index reveal lives entirely inside `@media (hover: hover)`. On a touch device there is no way to reveal the colour, so the grey must never be applied in the first place.
+
 ## Controls
 
 Every deliberate action goes through `src/components/ui/Button.tsx`. It renders whichever element the props imply — `<button>` with no `href`, `next/link` for an internal one, `<a target="_blank">` for an external one — because in this system a control's appearance does not depend on whether it navigates or acts.

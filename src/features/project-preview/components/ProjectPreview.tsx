@@ -27,7 +27,17 @@ export function ProjectPreview({
   const hasLiveLayer = project.preview.kind !== 'static'
 
   return (
-    <div className="relative size-full overflow-hidden bg-(--color-surface-well)">
+    <div
+      /*
+       * The only common ancestor of the poster, the video, the iframe and a
+       * component preview's canvas — so one filter here covers every preview
+       * kind, and no renderer has to know about saturation. The gallery uses
+       * it to desaturate everything but the fronting project; nothing styles
+       * it elsewhere, so the detail page's hero stays in colour.
+       */
+      data-project-media
+      className="relative size-full overflow-hidden bg-(--color-surface-well)"
+    >
       <PreviewPoster project={project} priority={priority} {...(sizes && { sizes })} />
       {hasLiveLayer && <LivePreview project={project} />}
     </div>
