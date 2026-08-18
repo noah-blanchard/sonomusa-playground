@@ -13,8 +13,13 @@ import { ProjectIndexStrip } from '@/features/project-index'
  * and hands them to the client viewport as children. The only JavaScript that
  * ships for the gallery is the interaction layer.
  */
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ project?: string }>
+}) {
   const projects = await projectRepository.getAll()
+  const { project: initialSlug } = await searchParams
 
   // The viewport needs names for labels and announcements; it never sees the
   // projects themselves, which is what keeps it project-agnostic.
@@ -32,7 +37,7 @@ export default async function HomePage() {
 
         <div id="gallery" className="scroll-mt-24">
           {projects.length > 0 ? (
-            <GalleryViewport items={items}>
+            <GalleryViewport items={items} initialSlug={initialSlug}>
               {projects.map((project, index) => (
                 <ProjectFrame
                   key={project.slug}

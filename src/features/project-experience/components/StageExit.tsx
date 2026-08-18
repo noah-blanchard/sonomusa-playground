@@ -5,15 +5,18 @@ import { useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 
 /**
- * The way back out.
+ * The ways back out.
  *
- * The link is the real affordance and works with no JavaScript at all; Escape
+ * Two destinations, because "leave the stage" means two different things:
+ * *what is this* goes to the project page, and *back to the gallery* goes home
+ * with the slug in the query string so the carousel opens on the frame the
+ * visitor was just inside — the stage closes and the work is sitting in the
+ * middle of the gallery, still active.
+ *
+ * The links are the real affordance and work with no JavaScript at all; Escape
  * is the enhancement on top, because a full-screen surface that traps you until
- * you find the right corner is a bug (docs/rules/05-experience.md).
- *
- * It goes to the project page rather than back through history: arriving here
- * from a shared URL is as likely as arriving from the gallery, and `history.back`
- * would strand that visitor.
+ * you find the right corner is a bug (docs/rules/05-experience.md). Escape
+ * goes to the gallery — the place the stage was most likely opened from.
  */
 export function StageExit({ slug, title }: { slug: string; title: string }) {
   const router = useRouter()
@@ -24,7 +27,7 @@ export function StageExit({ slug, title }: { slug: string; title: string }) {
 
       // An experience may well use Escape itself — let it say so by calling
       // preventDefault rather than having the stage steal the key outright.
-      router.push(`/projects/${slug}`)
+      router.push(`/?project=${slug}`)
     }
 
     window.addEventListener('keydown', onKeyDown)
@@ -32,15 +35,27 @@ export function StageExit({ slug, title }: { slug: string; title: string }) {
   }, [router, slug])
 
   return (
-    <Button
-      variant="ghost"
-      tone="secondary"
-      href={`/projects/${slug}`}
-      icon="arrow-left"
-      iconPosition="leading"
-      srLabel={`Leave ${title} and return to its project page`}
-    >
-      Back
-    </Button>
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      <Button
+        variant="ghost"
+        tone="secondary"
+        href={`/?project=${slug}`}
+        icon="arrow-left"
+        iconPosition="leading"
+        srLabel={`Close ${title} and return to the gallery`}
+      >
+        Gallery
+      </Button>
+
+      <Button
+        variant="ghost"
+        tone="secondary"
+        href={`/projects/${slug}`}
+        icon="arrow-right"
+        srLabel={`Read more about ${title}`}
+      >
+        More information
+      </Button>
+    </div>
   )
 }

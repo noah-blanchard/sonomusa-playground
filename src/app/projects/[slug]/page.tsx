@@ -191,13 +191,28 @@ export default async function ProjectPage({ params }: Params) {
         </section>
       )}
 
-      <nav className="mt-24" aria-label="Back">
+      <nav className="mt-24 flex flex-wrap items-center gap-x-8 gap-y-4" aria-label="Back">
+        {/*
+          Home carries the slug so the carousel opens on this project — the
+          visitor lands back on the frame they were reading about, not on the
+          first frame of the set.
+        */}
+        <Button
+          variant="ghost"
+          tone="secondary"
+          href={`/?project=${project.slug}`}
+          icon="arrow-left"
+          iconPosition="leading"
+          className="gap-4"
+        >
+          Back to gallery
+        </Button>
+
         <Button
           variant="ghost"
           tone="secondary"
           href="/projects"
-          icon="arrow-left"
-          iconPosition="leading"
+          icon="arrow-right"
           className="gap-4"
         >
           All projects

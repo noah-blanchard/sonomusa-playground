@@ -6,6 +6,7 @@ import { stageViewTransitionName, ViewTransition } from '@/components/ui/ViewTra
 import type { Project } from '@/domain/project'
 import { PreviewPoster } from '@/features/project-preview'
 import { ExperienceMount } from './ExperienceMount'
+import { StageClose } from './StageClose'
 import { StageExit } from './StageExit'
 
 /**
@@ -50,6 +51,12 @@ export function ProjectStage({ project, index }: { project: Project; index: numb
       </div>
 
       {componentId && <ExperienceMount componentId={componentId} title={project.title} />}
+
+      {/*
+        The one piece of chrome over the work, and only when reached for — the
+        stage has no header, so the corner hotspot is how the way out is found.
+      */}
+      <StageClose slug={project.slug} title={project.title} />
 
       {/*
         Over the work, not under it. A scrim rather than a solid: the bottom of

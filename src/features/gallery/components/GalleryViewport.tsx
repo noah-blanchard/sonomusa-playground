@@ -27,6 +27,7 @@ const AUTOPLAY_INTERVAL_MS = 7000
  */
 export function GalleryViewport({
   items,
+  initialSlug,
   children,
 }: {
   /**
@@ -35,10 +36,23 @@ export function GalleryViewport({
    * is what keeps it project-agnostic.
    */
   items: { slug: string; title: string; accent?: string }[]
+  /**
+   * Which frame fronts on arrival, from the `?project=` query param. Coming
+   * back from a stage or a project page, the gallery opens on the work the
+   * visitor was just inside rather than resetting to the first frame.
+   */
+  initialSlug?: string
   children: ReactNode
 }) {
-  const [state, dispatch] = useReducer(galleryReducer, items.length, (count) =>
-    createGalleryState(count),
+  const [state, dispatch] = useReducer(
+    galleryReducer,
+    { count: items.length, initialSlug },
+    ({ count, initialSlug }) => {
+      const index = initialSlug
+        ? items.findIndex((item) => item.slug === initialSlug)
+        : -1
+      return createGalleryState(count, index >= 0 ? index : 0)
+    },
   )
   const prefersReducedMotion = usePrefersReducedMotion()
 

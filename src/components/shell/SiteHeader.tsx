@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Logo } from '@/components/brand/Logo'
 import { Button } from '@/components/ui/Button'
 import { InfoOverlay } from './InfoOverlay'
@@ -10,8 +13,9 @@ import { InfoOverlay } from './InfoOverlay'
  * art. It stays quiet on purpose: the navigation is the frame, and the frame
  * must not compete with the work inside it (CONCEPT §2.2).
  *
- * A Server Component apart from the INFO trigger, which is the only part with
- * behaviour.
+ * Absent on the stage, like the footer: a full-bleed experience is the one
+ * place the shell's chrome would sit on the work, and the stage carries its
+ * own way out.
  */
 
 const SECTIONS = [
@@ -20,6 +24,10 @@ const SECTIONS = [
 ] as const
 
 export function SiteHeader() {
+  const pathname = usePathname()
+
+  if (pathname.endsWith('/play')) return null
+
   return (
     <header
       /*

@@ -1,3 +1,6 @@
+'use client'
+
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Label } from '@/components/ui/Label'
 
@@ -7,6 +10,10 @@ import { Label } from '@/components/ui/Label'
  * Copy follows CONCEPT §48 — confident, not promotional. "Things made to be
  * experienced" is the line the reference composition ends on, and it is the
  * whole positioning in five words.
+ *
+ * Absent on the stage: a full-bleed experience is the one place chrome from
+ * the shell would sit on top of the work, and the stage already carries its
+ * own way out.
  */
 
 const LINKS = [
@@ -15,6 +22,10 @@ const LINKS = [
 ] as const
 
 export function SiteFooter() {
+  const pathname = usePathname()
+
+  if (pathname.endsWith('/play')) return null
+
   return (
     <footer className="mx-auto flex max-w-(--layout-max) flex-col gap-4 px-(--layout-gutter-sm) py-8 sm:flex-row sm:items-center sm:justify-between sm:px-(--layout-gutter)">
       <div className="flex items-center gap-6">

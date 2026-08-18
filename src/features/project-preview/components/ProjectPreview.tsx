@@ -39,7 +39,17 @@ export function ProjectPreview({
       className="relative size-full overflow-hidden bg-(--color-surface-well)"
     >
       <PreviewPoster project={project} priority={priority} {...(sizes && { sizes })} />
-      {hasLiveLayer && <LivePreview project={project} />}
+      {/*
+        A preview shows the work; it is never a control. The live layer may
+        move — an iframe plays, a video loops, a canvas animates — but it takes
+        no clicks, so a visitor exploring the frame can never fall into the
+        piece by accident. Interaction belongs to the stage, one route away.
+      */}
+      {hasLiveLayer && (
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <LivePreview project={project} />
+        </div>
+      )}
     </div>
   )
 }
