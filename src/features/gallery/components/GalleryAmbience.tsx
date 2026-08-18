@@ -24,6 +24,23 @@ import { accentToRgb, fieldEllipse, seededRandom, spawnParticles } from '../lib/
  */
 
 const VERTEX = /* glsl */ `
+  /*
+   * The two knobs for how the field answers the cursor, kept together and named
+   * so neither has to be found inside the expression that uses them.
+   *
+   * PUSH_STRENGTH is how far a mote is shoved, in viewport widths at the very
+   * centre of the influence. 0.009 was the original and read as barely there;
+   * past roughly 0.02 the field stops being stirred and starts being shoved,
+   * which is the wrong register for something meant to sit behind the work.
+   *
+   * PUSH_RADIUS is how wide that influence reaches, as a fraction of the
+   * viewport. Widening it makes the response feel softer and slower even at the
+   * same strength, because more of the field moves a little rather than a few
+   * motes moving a lot.
+   */
+  const float PUSH_STRENGTH = 0.013;
+  const float PUSH_RADIUS = 0.34;
+
   attribute vec2 position;
   attribute vec4 motion;   // phase, speed, amplitude, size
   attribute float alpha;
@@ -68,10 +85,9 @@ const VERTEX = /* glsl */ `
     vec2 toPointer = pos - uPointer;
     toPointer.x *= uAspect;
     float distance = length(toPointer);
-    float radius = 0.34;
-    float push = max(0.0, 1.0 - distance / radius);
+    float push = max(0.0, 1.0 - distance / PUSH_RADIUS);
     pos += normalize(toPointer + 1e-6)
-         * push * push * 0.009 * uPointerStrength * (0.35 + reach * 1.3);
+         * push * push * PUSH_STRENGTH * uPointerStrength * (0.35 + reach * 1.3);
 
     vAlpha = alpha;
 
