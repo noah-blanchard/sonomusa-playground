@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { projectRepository } from '@/domain/project'
+import { projectRepository, selectHosted } from '@/domain/project'
 import { siteOrigin } from '@/env'
 
 /**
@@ -26,6 +26,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...projects.map((project) => ({
       url: `${siteOrigin}/projects/${project.slug}`,
       priority: 0.6,
+    })),
+    /*
+     * The stage exists only for projects that declare an experience, so the
+     * list is derived from the same selector the route's generateStaticParams
+     * uses. Deriving both from one place is why adding a project cannot leave
+     * the sitemap behind.
+     */
+    ...selectHosted(projects).map((project) => ({
+      url: `${siteOrigin}/projects/${project.slug}/play`,
+      priority: 0.7,
     })),
   ]
 }

@@ -78,11 +78,15 @@ async function checkNoProjectNamesInSharedCode(slugs: string[]) {
     ...(await filesIn('src/components/**/*.{ts,tsx}')),
     ...(await filesIn('src/app/**/*.{ts,tsx}')),
   ].filter(
-    // The component-preview registry maps componentIds to lazy imports, so it
-    // necessarily names projects. That mapping has to live somewhere, and a
-    // single declared registry is exactly the sanctioned place — which is what
-    // keeps every other file in shared UI free of project names.
-    (file) => !rel(file).includes('src/features/project-preview/registry/'),
+    // A registry maps componentIds to lazy imports, so it necessarily names
+    // projects. That mapping has to live somewhere, and a small number of
+    // declared registries is exactly the sanctioned place — which is what keeps
+    // every other file in shared UI free of project names.
+    //
+    // The exemption is by location, not by list: any `registry/` directory
+    // inside a feature is understood to be one of these maps. Nothing else in
+    // src/features/ may name a project, registry directory or not.
+    (file) => !/src\/features\/[^/]+\/registry\//.test(rel(file)),
   )
 
   for (const file of files) {

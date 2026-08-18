@@ -32,7 +32,12 @@ export const componentPreviewRegistry: Record<string, ComponentPreviewModule> = 
 }
 
 export function resolveComponentPreview(componentId: string): ComponentPreviewModule | null {
-  return componentPreviewRegistry[componentId] ?? null
+  // `hasOwn` for the same reason its sibling in project-experience/registry
+  // uses it: a bare lookup resolves "toString" to Object.prototype's, which
+  // would then be rendered as a component.
+  return Object.hasOwn(componentPreviewRegistry, componentId)
+    ? (componentPreviewRegistry[componentId] ?? null)
+    : null
 }
 
 export function registeredComponentIds(): string[] {
