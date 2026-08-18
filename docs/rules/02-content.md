@@ -24,6 +24,7 @@ src/content/projects/<slug>/
   thumbnail.webp        optional — index strip; falls back to poster
   preview.mp4           optional — only for preview.kind 'video'
   preview.tsx           optional — only for preview.kind 'component'
+  experience.tsx        optional — only when the manifest declares `experience`
   screenshots/
     01.webp
     02.webp
@@ -90,6 +91,28 @@ preview: { kind: 'component', componentId: 'morphwave-preview' }
 Then register the lazy import in `src/features/project-preview/registry/componentPreviews.ts`. That file is the one central place where heavy code is dynamically imported, so the bundle boundaries stay visible.
 
 Your preview must: render nothing heavy until activated, unload when inactive, and fall back to the poster on failure. A project is never permitted to degrade the gallery (CONCEPT §17).
+
+## Hosted experiences
+
+A preview is what the frame shows at rest. An **experience** is the work itself, and the playground can serve it at `/projects/<slug>/play` — which is where the frame's `Try it out` control goes.
+
+```ts
+experience: { componentId: 'morphwave-experience' }
+```
+
+Three steps, and no shared file changes beyond the registry line:
+
+1. Write `experience.tsx` beside `project.ts`. Default export, props `ProjectExperienceProps` from `@/features/project-experience`.
+2. Register the lazy import in `src/features/project-experience/registry/experiences.ts`.
+3. Declare the id in the manifest.
+
+`bun run validate:content` refuses a manifest naming an id nobody registered, so step 3 cannot ship without step 2. The route, the sitemap entry and the gallery's primary control all follow from the manifest — there is nothing else to wire.
+
+**Why it is a second field rather than a flag on `preview`.** The two have different budgets. A preview has to be cheap enough for the whole gallery to carry six of them on one page; an experience is opened deliberately, one at a time, and may cost what it costs. Collapsing them would put the expensive one on the homepage.
+
+Your experience must: call `onReady` when it has painted and `onError` when it cannot start, release everything on unmount, honour `reducedMotion`, and be operable from the keyboard. The stage keeps the poster underneath until `onReady`, so a slow or broken experience shows the work at rest rather than a black rectangle.
+
+**`links.live` is the third option, and it is not this.** It points at a project's own site, which we do not own and cannot morph into. It gets its own control — `Try it live`, with a different glyph — precisely so the two are never confused. A project declaring both prefers the stage.
 
 ## Assets
 
