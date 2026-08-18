@@ -30,6 +30,13 @@ export const project = defineProject({
    */
   preview: { kind: 'component', componentId: 'musai-preview' },
 
+  /*
+   * And the whole piece, on a stage this repository serves. The preview says
+   * what it is; this is the thing itself, and it is what the frame's primary
+   * call to action opens.
+   */
+  experience: { componentId: 'musai-experience' },
+
   technologies: ['Canvas', 'TypeScript'],
   presentation: { accent: '#5FA8E8' },
 })
