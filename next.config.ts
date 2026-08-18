@@ -21,10 +21,18 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: false },
 
   images: {
-    // Project media is authored as .webp; AVIF is emitted where the client
-    // supports it. Self-hosted optimization is handled by `sharp`, which is a
-    // runtime dependency for exactly this reason.
-    formats: ['image/avif', 'image/webp'],
+    // Project media is authored as .webp, and WebP is the only format emitted.
+    //
+    // AVIF is deliberately absent even though it compresses better: the posters
+    // are 1px coloured hairlines on black, and sharp's AVIF encoder applies
+    // chroma subsampling that cannot be disabled (neither `chromaSubsampling`
+    // nor `lossless` preserves the signal — measured 0% and 19% coloured
+    // against WebP's 96%). Browsers list `image/avif` first in Accept, so when
+    // it was offered every client got a grey poster and the gallery's
+    // grey-to-colour state channel collapsed. WebP keeps the hairlines intact.
+    // Self-hosted optimization is handled by `sharp`, which is a runtime
+    // dependency for exactly this reason.
+    formats: ['image/webp'],
     // Projects live on their own subdomains, so remote posters must be
     // possible later without a code change. Patterns are added deliberately.
     remotePatterns: [],

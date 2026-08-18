@@ -7,12 +7,12 @@ import { accentToRgb, frameBox, spawnParticles } from '../lib/ambience'
 /**
  * The ambient field that marks the fronting project.
  *
- * This is the one GPU layer in the shell, and it is deliberately not an effect.
- * `docs/rules/03-design-system.md` asks for an active indicator that is a gap
- * rather than a glow, and CONCEPT §25 forbids the brand leaning on particles or
- * a signature shader. What survives both is the stencil motif in motion: hard
- * hairline points at low alpha, no additive blending, no falloff, no bloom —
- * the same pen that draws `.stencil-rule`, drifting. See ADR 0003.
+ * This is the one GPU layer in the shell. `docs/rules/03-design-system.md`
+ * permits a glowing field here and nowhere else: each point is a soft mote
+ * (radial falloff) and overlaps accumulate (additive blending), so the band
+ * around the active card reads as a glow. That permission is scoped to this
+ * single layer — see ADR 0003 and its 2026-08-17 amendment, which relaxed the
+ * original "gap, not a glow" constraint at product direction.
  *
  * It sits *behind* every frame. The active card is opaque and painted at
  * z-index 30, so it occludes the middle of the field and what remains is a band
@@ -54,22 +54,27 @@ const VERTEX = /* glsl */ `
     vec2 pos = position + wander;
 
     /*
-     * Repulsion, kept very small on purpose. Aspect-corrected so the falloff is
-     * a circle on screen rather than an ellipse, and quadratic so a particle
-     * eases out of the way instead of jumping.
+     * Repulsion. uPointer is already eased on the CPU, so this never sees the
+     * cursor jump — a raw position made the whole field flick sideways on a
+     * fast mouse move. Aspect-corrected so the falloff is a circle on screen
+     * rather than an ellipse, and quadratic so a particle eases out of the way
+     * instead of jumping.
      */
     vec2 toPointer = pos - uPointer;
     toPointer.x *= uAspect;
     float distance = length(toPointer);
-    float radius = 0.18;
+    float radius = 0.22;
     float push = max(0.0, 1.0 - distance / radius);
-    pos += normalize(toPointer + 1e-6) * push * push * 0.035 * uPointerStrength;
+    pos += normalize(toPointer + 1e-6) * push * push * 0.012 * uPointerStrength;
 
     vAlpha = alpha;
 
     // Viewport space (y down) to clip space (y up).
     gl_Position = vec4(pos.x * 2.0 - 1.0, 1.0 - pos.y * 2.0, 0.0, 1.0);
-    gl_PointSize = motion.w * uDpr;
+    // The fragment shader's radial falloff needs a few pixels to resolve, so a
+    // point is drawn larger than its nominal hairline and softened back to a
+    // mote by the glow.
+    gl_PointSize = motion.w * uDpr * 3.0;
   }
 `
 
@@ -82,13 +87,19 @@ const FRAGMENT = /* glsl */ `
   varying float vAlpha;
 
   void main() {
-    // Flat and hard-edged. A radial falloff here is what would turn a hairline
-    // point into a glowing mote, which is the thing this must not become.
-    gl_FragColor = vec4(uColor, vAlpha * uOpacity);
+    /*
+     * A radial falloff turns each point into a soft mote. gl_PointCoord is
+     * the point-local 0–1 square; distance from its centre drives a smooth
+     * falloff so the sprite reads as a glow rather than a hard pixel. Paired
+     * with additive blending, overlaps accumulate into brightness.
+     */
+    float d = length(gl_PointCoord - 0.5);
+    float glow = smoothstep(0.5, 0.0, d);
+    gl_FragColor = vec4(uColor, vAlpha * glow * uOpacity);
   }
 `
 
-const PARTICLE_COUNT = 440
+const PARTICLE_COUNT = 2000
 /** Matches `--gallery-bleed`. CSS owns the value; this converts it to pixels. */
 const BLEED_REM = 3.25
 
@@ -178,6 +189,14 @@ export function GalleryAmbience({
     let mesh: Mesh | undefined
     let frame = 0
     let stopped = false
+    /*
+     * The pointer is smoothed, not raw. `target` is where the cursor actually
+     * is; the values fed to the shader trail it by a fixed lerp each frame, so
+     * a fast mouse move reads as the field sweeping over rather than snapping.
+     * Strength eases the same way, fading the response in on entry and out on
+     * leave instead of cutting.
+     */
+    const pointerTarget = { x: -1, y: -1, strength: 0 }
     const pointer = { x: -1, y: -1, strength: 0 }
     const colour = [...targetColour.current] as [number, number, number]
 
@@ -228,6 +247,15 @@ export function GalleryAmbience({
         },
       })
 
+      /*
+       * Additive blending: SRC_ALPHA / ONE rather than the default
+       * SRC_ALPHA / ONE_MINUS_SRC_ALPHA. Overlapping motes accumulate into
+       * brightness, which is what makes the band around the card read as a
+       * glow rather than a dusting of separate points. The canvas sits on the
+       * shell's near-black ground, so adding light can only brighten.
+       */
+      program.setBlendFunc(gl.SRC_ALPHA, gl.ONE)
+
       mesh?.geometry.remove()
       mesh = new Mesh(gl, { mode: gl.POINTS, geometry, program })
     }
@@ -247,6 +275,13 @@ export function GalleryAmbience({
         colour[channel]! += (target[channel]! - colour[channel]!) * 0.04
       }
 
+      // Ease the pointer toward the cursor. A small factor keeps the trailing
+      // motion languid rather than jerky — the field glides after the mouse.
+      const ease = 0.035
+      pointer.x += (pointerTarget.x - pointer.x) * ease
+      pointer.y += (pointerTarget.y - pointer.y) * ease
+      pointer.strength += (pointerTarget.strength - pointer.strength) * ease
+
       uniforms.uPointer!.value = [pointer.x, pointer.y]
       uniforms.uPointerStrength!.value = pointer.strength
 
@@ -262,13 +297,13 @@ export function GalleryAmbience({
 
     const onPointerMove = (event: PointerEvent) => {
       const rect = parent.getBoundingClientRect()
-      pointer.x = (event.clientX - rect.left) / rect.width
-      pointer.y = (event.clientY - rect.top) / rect.height
-      pointer.strength = 1
+      pointerTarget.x = (event.clientX - rect.left) / rect.width
+      pointerTarget.y = (event.clientY - rect.top) / rect.height
+      pointerTarget.strength = 1
     }
 
     const onPointerLeave = () => {
-      pointer.strength = 0
+      pointerTarget.strength = 0
     }
 
     /*

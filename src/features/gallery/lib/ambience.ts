@@ -151,9 +151,12 @@ export function spawnParticles(
       // Wander scales with distance from the card: the ones furthest out are
       // the loosest, which keeps the edge of the field soft rather than a wall.
       amplitude: (0.006 + random() * 0.014) * (1 + reach * 2),
-      // Dimmer the further out, so the field fades rather than ends.
-      alpha: (0.24 + random() * 0.42) * (1 - Math.min(1, reach / (BAND * scale)) * 0.5),
-      size: random() < 0.85 ? 1 : 2,
+      // Bright: additive blending and the glow falloff spread each mote's
+      // energy over several pixels, so the base alpha is high to keep the band
+      // luminous. Still dimmer the further out, so the field fades rather
+      // than ends.
+      alpha: (0.6 + random() * 0.4) * (1 - Math.min(1, reach / (BAND * scale)) * 0.4),
+      size: random() < 0.6 ? 1 : 2,
     })
   }
 
