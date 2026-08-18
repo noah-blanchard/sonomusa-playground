@@ -216,6 +216,25 @@ describe('parseProject', () => {
     })
   })
 
+  describe('hosted experience', () => {
+    it('treats a missing experience as valid — most projects have nothing to run', () => {
+      expect(parseProject(minimalManifest()).experience).toBeUndefined()
+    })
+
+    it('accepts a componentId the registry can resolve', () => {
+      const project = parseProject(
+        minimalManifest({ experience: { componentId: 'musai-experience' } }),
+      )
+      expect(project.experience?.componentId).toBe('musai-experience')
+    })
+
+    it('rejects an empty componentId rather than routing to a blank stage', () => {
+      expect(() => parseProject(minimalManifest({ experience: { componentId: '' } }))).toThrow(
+        ProjectValidationError,
+      )
+    })
+  })
+
   describe('presentation hints', () => {
     it('accepts a CSS aspect ratio', () => {
       const project = parseProject(
