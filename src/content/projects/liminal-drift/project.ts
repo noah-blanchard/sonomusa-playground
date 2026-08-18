@@ -27,4 +27,5 @@ export const project = defineProject({
   preview: { kind: 'video', src: 'preview.mp4' },
 
   technologies: ['Canvas', 'TypeScript'],
+  presentation: { accent: '#7A6CF0' },
 })

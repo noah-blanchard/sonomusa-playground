@@ -30,5 +30,5 @@ export const project = defineProject({
   // offers no destination and `status` carries the meaning.
 
   technologies: ['WebGL', 'Web Audio API', 'TypeScript'],
-  presentation: { preferredAspectRatio: '4 / 3' },
+  presentation: { preferredAspectRatio: '4 / 3', accent: '#2FD3C0' },
 })

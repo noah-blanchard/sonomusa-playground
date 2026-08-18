@@ -31,4 +31,5 @@ export const project = defineProject({
   preview: { kind: 'component', componentId: 'musai-preview' },
 
   technologies: ['Canvas', 'TypeScript'],
+  presentation: { accent: '#5FA8E8' },
 })

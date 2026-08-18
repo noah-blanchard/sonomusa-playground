@@ -27,4 +27,5 @@ export const project = defineProject({
   technologies: ['Web Audio API', 'TypeScript'],
 
   credits: [{ label: 'Sound design', value: 'SonoMusa' }],
+  presentation: { accent: '#E0A03C' },
 })

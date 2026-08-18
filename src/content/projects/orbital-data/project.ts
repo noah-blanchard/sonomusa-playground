@@ -33,4 +33,6 @@ export const project = defineProject({
     { label: 'Data', value: 'Public telemetry archive' },
     { label: 'Design', value: 'SonoMusa' },
   ],
+
+  presentation: { accent: '#E2683C' },
 })

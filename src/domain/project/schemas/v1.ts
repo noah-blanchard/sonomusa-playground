@@ -77,6 +77,20 @@ export const PresentationSchema = z.object({
       y: z.number().min(0).max(1),
     })
     .optional(),
+  /**
+   * The project's own colour, in the project's own hands.
+   *
+   * Used for its artwork and for the ambient field that marks it as active —
+   * never for shell chrome. The shell stays bone on obsidian and `--color-accent`
+   * stays colourless; this is the one channel through which a project's identity
+   * reaches the frame, which is what CONCEPT §2.2 means by projects owning their
+   * colour. Absent is valid: the art falls back to bone and the field to the line
+   * colour.
+   */
+  accent: z
+    .string()
+    .regex(/^#[0-9a-f]{6}$/i, 'Use a six-digit hex such as "#2FD3C0".')
+    .optional(),
 })
 
 export const ProjectSchemaV1 = z.object({

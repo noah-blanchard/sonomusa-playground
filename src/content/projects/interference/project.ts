@@ -20,4 +20,6 @@ export const project = defineProject({
   media: { poster: 'poster.webp' },
 
   preview: { kind: 'static' },
+
+  presentation: { accent: '#D2569B' },
 })
