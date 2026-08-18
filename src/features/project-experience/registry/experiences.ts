@@ -42,6 +42,7 @@ export type ProjectExperienceModule = ComponentType<ProjectExperienceProps>
 export const projectExperienceRegistry: Record<string, ProjectExperienceModule> = {
   'musicphone-experience': lazy(() => import('@/content/projects/musicphone/experience')),
   'zoomquilt-experience': lazy(() => import('@/content/projects/zoomquilt/experience')),
+  'sono303-experience': lazy(() => import('@/content/projects/sono303/experience')),
 }
 
 export function resolveProjectExperience(componentId: string): ProjectExperienceModule | null {

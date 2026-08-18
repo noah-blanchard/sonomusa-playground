@@ -16,7 +16,7 @@ export const project = defineProject({
   categories: ['audiovisual'],
 
   featured: true,
-  order: 7,
+  order: 3,
 
   media: {
     poster: 'poster.webp',

@@ -2,6 +2,7 @@
 // Run `bun run registry:generate`. See docs/rules/01-architecture.md.
 
 import { project as musicphone } from './musicphone/project'
+import { project as sono303 } from './sono303/project'
 import { project as zoomquilt } from './zoomquilt/project'
 
 /**
@@ -11,5 +12,6 @@ import { project as zoomquilt } from './zoomquilt/project'
  */
 export const projectManifests: readonly unknown[] = [
   musicphone,
+  sono303,
   zoomquilt,
 ]
