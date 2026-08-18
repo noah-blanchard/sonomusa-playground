@@ -2,7 +2,7 @@
 
 import { Children, useCallback, useMemo, useReducer, type CSSProperties, type ReactNode } from 'react'
 import { usePrefersReducedMotion } from '@/components/ui/usePrefersReducedMotion'
-import { STAGE_VIEW_TRANSITION, ViewTransition } from '@/components/ui/ViewTransition'
+import { stageViewTransitionName, ViewTransition } from '@/components/ui/ViewTransition'
 import { PreviewActivationProvider } from '@/features/project-preview'
 import { useGalleryInput } from '../hooks/useGalleryInput'
 import { depthStyle, mobileDepthStyle, signedOffset } from '../lib/depth'
@@ -103,20 +103,22 @@ export function GalleryViewport({
 
             return (
               /*
-               * The fronting frame and the stage it opens share one name, so
-               * the browser treats them as the same object across the
-               * navigation and moves it rather than swapping two pages.
+               * A frame and the stage it opens share one name, so the browser
+               * treats them as the same object across the navigation and moves
+               * it rather than swapping two pages.
                *
-               * The wrapper is unconditional and only the NAME is toggled.
-               * Wrapping conditionally would change the tree shape every time
-               * the active index moves, remounting every frame and reloading
-               * every preview. And the name has to be toggled, because a
-               * duplicate name aborts the whole transition — six frames all
-               * called the same thing would mean no morph at all.
+               * Every frame carries its own name, all the time. The obvious
+               * alternative — one constant name, moved onto whichever frame is
+               * active — leaves React holding the name for the frame that just
+               * gave it up (a name is released on unmount, not on prop change),
+               * so the two collide and the transition it was meant to enable
+               * never runs. Per-slug names cannot collide, and `default="none"`
+               * keeps the five frames with no counterpart on the stage out of
+               * the transition entirely.
                */
               <ViewTransition
                 key={item.slug}
-                name={isActive ? STAGE_VIEW_TRANSITION : undefined}
+                name={stageViewTransitionName(item.slug)}
                 share="morph"
                 default="none"
               >
