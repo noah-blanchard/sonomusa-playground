@@ -52,6 +52,29 @@ export const MediaSchema = z.object({
   screenshots: z.array(AssetPath).default([]),
 })
 
+/**
+ * The playground can host this project's experience itself.
+ *
+ * Deliberately three separate ideas, kept apart on purpose:
+ *
+ *   preview      what the frame shows at rest — a loop, not a thing you use
+ *   experience   the work itself, running on a route this repository serves
+ *   links.live   the work itself, running somewhere we do not own
+ *
+ * Collapsing any two of them would put navigation logic inside the preview
+ * adapters, which is exactly what `schemas/preview.ts` says it exists to
+ * prevent. Absence is meaningful: with neither this nor `links.live` the frame
+ * offers no way in at all, and `status` carries the meaning. A dead call to
+ * action is worse than none.
+ *
+ * The component is named by id and resolved through a registry, never carried
+ * here — that is what keeps a manifest serializable and a CMS possible later
+ * (CONCEPT §16).
+ */
+export const ExperienceSchema = z.object({
+  componentId: z.string().min(1),
+})
+
 export const LinksSchema = z.object({
   /**
    * The project's own subdomain. OPTIONAL, and absence is meaningful — not
@@ -120,6 +143,7 @@ export const ProjectSchemaV1 = z.object({
 
   media: MediaSchema,
   preview: PreviewSchema,
+  experience: ExperienceSchema.optional(),
   links: LinksSchema.default({}),
 
   technologies: z.array(z.string().min(1)).default([]),

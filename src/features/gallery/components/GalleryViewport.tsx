@@ -1,9 +1,10 @@
 'use client'
 
 import { Children, useCallback, useMemo, useReducer, type CSSProperties, type ReactNode } from 'react'
+import { usePrefersReducedMotion } from '@/components/ui/usePrefersReducedMotion'
+import { STAGE_VIEW_TRANSITION, ViewTransition } from '@/components/ui/ViewTransition'
 import { PreviewActivationProvider } from '@/features/project-preview'
 import { useGalleryInput } from '../hooks/useGalleryInput'
-import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { depthStyle, mobileDepthStyle, signedOffset } from '../lib/depth'
 import { createGalleryState, galleryReducer } from '../lib/galleryReducer'
 import { GalleryAmbience } from './GalleryAmbience'
@@ -101,8 +102,25 @@ export function GalleryViewport({
             const isActive = offset === 0
 
             return (
-              <div
+              /*
+               * The fronting frame and the stage it opens share one name, so
+               * the browser treats them as the same object across the
+               * navigation and moves it rather than swapping two pages.
+               *
+               * The wrapper is unconditional and only the NAME is toggled.
+               * Wrapping conditionally would change the tree shape every time
+               * the active index moves, remounting every frame and reloading
+               * every preview. And the name has to be toggled, because a
+               * duplicate name aborts the whole transition — six frames all
+               * called the same thing would mean no morph at all.
+               */
+              <ViewTransition
                 key={item.slug}
+                name={isActive ? STAGE_VIEW_TRANSITION : undefined}
+                share="morph"
+                default="none"
+              >
+              <div
                 role="group"
                 aria-roledescription="slide"
                 aria-label={`${index + 1} of ${items.length}`}
@@ -128,6 +146,7 @@ export function GalleryViewport({
               >
                 {frame}
               </div>
+              </ViewTransition>
             )
           })}
         </PreviewActivationProvider>

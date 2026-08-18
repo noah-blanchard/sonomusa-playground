@@ -69,6 +69,44 @@ export function selectLinkable(projects: readonly Project[]): Project[] {
   return projects.filter((project) => project.links.live !== undefined)
 }
 
+/**
+ * Where "try it" goes, or nothing.
+ *
+ * `hosted` is a route this repository serves; `external` is somewhere we do
+ * not own. Deliberately no URL in either case — the domain layer describes
+ * projects, it does not know the shape of the site's routes. The feature layer
+ * builds the path from the slug, the same way it always has.
+ *
+ * Hosted wins when a project declares both. When the playground can hold the
+ * visitor it should: the continuity between the frame and the running work is
+ * the whole point of hosting it at all, and the external URL is still offered
+ * on the project page.
+ *
+ * Returning null is a real answer, not a gap. Most projects have not shipped
+ * anything to try yet, and the frame must show no call to action rather than a
+ * dead one.
+ */
+export type ExperienceTarget =
+  | { kind: 'hosted'; componentId: string }
+  | { kind: 'external'; url: string }
+
+export function experienceTarget(project: Project): ExperienceTarget | null {
+  if (project.experience) {
+    return { kind: 'hosted', componentId: project.experience.componentId }
+  }
+
+  if (project.links.live) {
+    return { kind: 'external', url: project.links.live }
+  }
+
+  return null
+}
+
+/** Projects the playground hosts itself — the ones with a stage route. */
+export function selectHosted(projects: readonly Project[]): Project[] {
+  return projects.filter((project) => project.experience !== undefined)
+}
+
 export interface TagCount {
   tag: string
   count: number

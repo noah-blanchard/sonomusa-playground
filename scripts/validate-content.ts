@@ -19,6 +19,7 @@ import { join, relative } from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'
 import { parseProject } from '../src/domain/project/parse'
 import type { Project } from '../src/domain/project/types'
+import { registeredExperienceIds } from '../src/features/project-experience/registry/experiences'
 import { registeredComponentIds } from '../src/features/project-preview/registry/componentPreviews'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
@@ -141,6 +142,21 @@ async function main() {
       }
     }
 
+    // Same reasoning for the stage: an unregistered id would route the visitor
+    // to a full-screen poster with no work on it, and nothing would say why.
+    if (project.experience) {
+      const registered = registeredExperienceIds()
+
+      if (!registered.includes(project.experience.componentId)) {
+        report(
+          source,
+          `experience.componentId "${project.experience.componentId}" is not registered.\n` +
+            `Add it to src/features/project-experience/registry/experiences.ts.` +
+            (registered.length > 0 ? `\nRegistered: ${registered.join(', ')}` : '\nNothing is registered yet.'),
+        )
+      }
+    }
+
     validated.push({ dir, project })
   }
 
@@ -185,9 +201,12 @@ async function main() {
   }
 
   const withLive = validated.filter(({ project }) => project.links.live).length
+  const withStage = validated.filter(({ project }) => project.experience).length
+  const wayIn = validated.filter(({ project }) => project.links.live || project.experience).length
 
   console.log(`✓ ${validated.length} project(s) valid`)
-  console.log(`  ${withLive} with a live URL, ${validated.length - withLive} without (status carries the meaning)`)
+  console.log(`  ${withStage} hosted on a stage here, ${withLive} with a live URL of their own`)
+  console.log(`  ${validated.length - wayIn} with nothing to try yet (status carries the meaning)`)
 }
 
 main().catch((error: unknown) => {

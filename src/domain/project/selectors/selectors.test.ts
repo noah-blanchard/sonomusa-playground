@@ -8,7 +8,9 @@ import {
   selectByCategory,
   selectByStatus,
   selectByTag,
+  experienceTarget,
   selectFeatured,
+  selectHosted,
   selectLinkable,
   selectNeighbours,
   selectRelated,
@@ -211,5 +213,57 @@ describe('formatProjectNumber', () => {
 
   it('does not truncate beyond three digits', () => {
     expect(formatProjectNumber(999)).toBe('1000')
+  })
+})
+
+describe('experienceTarget', () => {
+  it('points at the hosted stage when the playground can run the work', () => {
+    const project = makeProject({ experience: { componentId: 'fixture-experience' } })
+
+    expect(experienceTarget(project)).toEqual({
+      kind: 'hosted',
+      componentId: 'fixture-experience',
+    })
+  })
+
+  it('points at the project’s own site when that is all there is', () => {
+    const project = makeProject({ links: { live: 'https://fixture.sonomusa.com' } })
+
+    expect(experienceTarget(project)).toEqual({
+      kind: 'external',
+      url: 'https://fixture.sonomusa.com',
+    })
+  })
+
+  it('prefers the hosted stage over the external site', () => {
+    // Continuity between the frame and the running work is the reason for
+    // hosting it at all; the external URL is still offered on the project page.
+    const project = makeProject({
+      experience: { componentId: 'fixture-experience' },
+      links: { live: 'https://fixture.sonomusa.com' },
+    })
+
+    expect(experienceTarget(project)).toEqual({
+      kind: 'hosted',
+      componentId: 'fixture-experience',
+    })
+  })
+
+  it('returns null when there is nothing to try', () => {
+    // Not a gap — the frame must offer no call to action rather than a dead one.
+    expect(experienceTarget(makeProject())).toBeNull()
+  })
+})
+
+describe('selectHosted', () => {
+  it('returns only the projects with a stage of their own', () => {
+    const projects = makeProjects([
+      { experience: { componentId: 'a-experience' } },
+      {},
+      { links: { live: 'https://elsewhere.example' } },
+      { experience: { componentId: 'd-experience' } },
+    ])
+
+    expect(selectHosted(projects).map((p) => p.slug)).toEqual(['fixture-1', 'fixture-4'])
   })
 })

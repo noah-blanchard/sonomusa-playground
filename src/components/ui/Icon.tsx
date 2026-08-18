@@ -1,4 +1,11 @@
-import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, XIcon } from '@phosphor-icons/react/ssr'
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ArrowSquareOutIcon,
+  ArrowsOutIcon,
+  ArrowUpRightIcon,
+  XIcon,
+} from '@phosphor-icons/react/ssr'
 
 /**
  * The shell's entire icon vocabulary.
@@ -27,7 +34,20 @@ import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, XIcon } from '@phospho
 const ICONS = {
   'arrow-left': ArrowLeftIcon,
   'arrow-right': ArrowRightIcon,
+  /** A link that leaves the page but stays on the site. */
   'arrow-up-right': ArrowUpRightIcon,
+  /**
+   * The way into a piece the playground runs itself — the glyph is the frame
+   * pushing outward, which is literally what activating it does.
+   */
+  'arrows-out': ArrowsOutIcon,
+  /**
+   * The way into a piece hosted somewhere we do not own. Distinct from
+   * `arrow-up-right` on purpose: the two calls to action sit beside each other
+   * in the frame, and "opens the work here" and "leaves for the project's own
+   * site" must not be told apart by reading the label alone.
+   */
+  'arrow-square-out': ArrowSquareOutIcon,
   close: XIcon,
 } as const
 

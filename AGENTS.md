@@ -60,6 +60,7 @@ src/domain/project/**      schemas · migrations       pure TypeScript, zero Rea
         ↓
 src/features/**            gallery · project-index    React, project-agnostic
                            project-preview
+                           project-experience
         ↓
 src/app/**                 routes · metadata          composition
 ```
@@ -67,6 +68,8 @@ src/app/**                 routes · metadata          composition
 `src/components/ui/**` and `src/styles/**` are leaves. Anything above the domain may use them.
 
 **The one exception**, deliberately narrow and documented: `src/domain/project/repository/sources/**` is the only place permitted to import `src/content/**`. That is the seam where the content directory binds to the repository port. Replacing that one file with a CMS adapter is the entire reason the boundary exists.
+
+The registries under `src/features/*/registry/**` are the one place where shared UI may *name* a project — they map a `componentId` to a lazy import, and that mapping has to live somewhere. `check:architecture` exempts those directories by location and nothing else.
 
 ---
 
@@ -79,6 +82,7 @@ Match your change to a row before you create a file.
 | Adding a project | `src/content/projects/<slug>/` | One directory, one `project.ts`, one poster. Nothing else. See `docs/rules/02-content.md`. |
 | Adding a metadata field | `src/domain/project/schemas/` | Optional fields need no version bump. Required ones do — see §6. |
 | Adding a preview technology | `src/features/project-preview/renderers/` | Add the variant to the union, add one renderer, register it in the map. Touch nothing else. |
+| Giving a project a playable stage | `src/content/projects/<slug>/experience.tsx` + registry entry | Declare `experience: { componentId }`, write the component, add one line to `src/features/project-experience/registry/experiences.ts`. The route, the sitemap and the frame's primary control all follow. |
 | Adding a derived query | `src/domain/project/selectors/` | Pure function over `Project[]`. Never a hand-maintained array. |
 | Changing gallery motion or layout | `src/features/gallery/` | Must stay project-agnostic. |
 | Adding a colour, size, or duration | `src/styles/tokens.css` | Never an arbitrary literal in a component. |

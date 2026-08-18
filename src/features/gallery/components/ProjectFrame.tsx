@@ -1,4 +1,4 @@
-import type { Project } from '@/domain/project'
+import { experienceTarget, type Project } from '@/domain/project'
 import { ProjectPreview } from '@/features/project-preview'
 import { Button } from '@/components/ui/Button'
 import { Label } from '@/components/ui/Label'
@@ -35,13 +35,15 @@ export function ProjectFrame({
   priority?: boolean
 }) {
   /*
-   * Projects live on their own subdomains, so the primary action leaves the
-   * site. When a project has not shipped one yet, the detail page is the
-   * destination instead — and `status` is what explains why. A dead call to
-   * action is worse than none (docs/rules/02-content.md).
+   * Two intentions, two controls. "Let me use this" and "tell me about this"
+   * are not the same request, and the frame used to answer both with one link.
+   *
+   * The primary one is conditional, and its absence is the point: most projects
+   * have nothing to try yet, and `status` is what explains why. A dead call to
+   * action is worse than none (docs/rules/02-content.md). The secondary one is
+   * always there, because every project has a page.
    */
-  const live = project.links.live
-  const href = live ?? `/projects/${project.slug}`
+  const target = experienceTarget(project)
 
   return (
     /*
@@ -103,18 +105,44 @@ export function ProjectFrame({
               ))}
             </div>
 
-            {/* The project title is inside the accessible name, so the link
-                resolves to "View <title>" rather than a bare "View project"
-                repeated down the page. Button appends the new-tab warning
-                itself when the destination is external. */}
-            <Button
-              href={href}
-              external={Boolean(live)}
-              icon={live ? 'arrow-up-right' : 'arrow-right'}
-              srLabel={`View ${project.title}`}
-            >
-              View project
-            </Button>
+            {/* The project title is inside every accessible name, so each link
+                resolves to "Try <title>" rather than six identical "Try it out"
+                links down the page. Button appends the new-tab warning itself
+                when the destination is external. */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+              {target?.kind === 'hosted' && (
+                <Button
+                  variant="outline"
+                  href={`/projects/${project.slug}/play`}
+                  icon="arrows-out"
+                  srLabel={`Try ${project.title}`}
+                >
+                  Try it out
+                </Button>
+              )}
+
+              {target?.kind === 'external' && (
+                <Button
+                  variant="outline"
+                  href={target.url}
+                  external
+                  icon="arrow-square-out"
+                  srLabel={`Try ${project.title} live on its own site`}
+                >
+                  Try it live
+                </Button>
+              )}
+
+              <Button
+                variant="ghost"
+                tone="secondary"
+                href={`/projects/${project.slug}`}
+                icon="arrow-right"
+                srLabel={`Read about ${project.title}`}
+              >
+                View project
+              </Button>
+            </div>
           </div>
         </div>
 

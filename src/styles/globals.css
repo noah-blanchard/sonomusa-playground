@@ -2,6 +2,7 @@
 @import './tokens.css';
 @import './stencil.css';
 @import './gallery.css';
+@import './transitions.css';
 
 /*
  * Shell baseline only. Everything visual is a token — see tokens.css and

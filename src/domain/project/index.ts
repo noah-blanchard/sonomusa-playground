@@ -29,17 +29,19 @@ export type { ProjectRepository, ProjectSource } from './repository'
 export {
   collectTags,
   compareProjects,
+  experienceTarget,
   findBySlug,
   formatProjectNumber,
   selectByCategory,
   selectByStatus,
   selectByTag,
   selectFeatured,
+  selectHosted,
   selectLinkable,
   selectNeighbours,
   selectRelated,
   sortProjects,
 } from './selectors'
-export type { Neighbours, TagCount } from './selectors'
+export type { ExperienceTarget, Neighbours, TagCount } from './selectors'
 
 export type { Preview, PreviewKind, Project, ProjectInput, ProjectStatus } from './types'
