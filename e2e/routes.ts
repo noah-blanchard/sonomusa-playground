@@ -21,7 +21,23 @@ export async function allRoutes(page: Page): Promise<string[]> {
     throw new Error('No project links found on /projects — the suite would silently test nothing.')
   }
 
-  return ['/', '/projects', ...projectPaths]
+  /*
+   * Stage routes exist only for projects that host an experience, and they are
+   * not linked from the index — so scraping /projects cannot find them. The
+   * sitemap is already derived from the same selector the route itself uses,
+   * which makes reading it the one way to discover them without naming a
+   * project here.
+   */
+  const sitemap = await (await page.request.get('/sitemap.xml')).text()
+  const stagePaths = [
+    ...new Set(
+      [...sitemap.matchAll(/<loc>[^<]*?(\/projects\/[a-z0-9-]+\/play)<\/loc>/g)].map(
+        (match) => match[1]!,
+      ),
+    ),
+  ].sort()
+
+  return ['/', '/projects', ...projectPaths, ...stagePaths]
 }
 
 /** The three widths the original audit measured: phone, tablet, desktop. */
